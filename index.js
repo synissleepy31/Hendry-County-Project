@@ -43,6 +43,41 @@ import {
     getRoleAuditLog
 } from "./services/roleManagementStore.js";
 
+
+// ======================================================
+// CUSTOM PROTECTED ROLE IDS
+// These Discord roles are always protected in the dashboard.
+// Remove an ID from this list if you want that role manageable again.
+// ======================================================
+
+const PROTECTED_ROLE_IDS = [
+    "1534364509907718204",
+    "1533596103168233753",
+    "1533590255842627764",
+    "1533590255842627763",
+    "1533590255842627762",
+    "1533590255842627761",
+    "1533590255842627760",
+    "1533590255842627759",
+    "1533590255842627757",
+    "1533590255842627756",
+    "1533590255834366071",
+    "1533590255834366070",
+    "1533590255834366069",
+    "1533596635156713543",
+    "1533590255834366067",
+    "1533590255834366066",
+    "1533590255834366065",
+    "1533590255834366063",
+    "1536547959741874276",
+    "1533590255834366064",
+    "1536547612168032326",
+    "1533590255834366062",
+    "1533590255825981528",
+    "1533590255825981526",
+    "1533590255825981525"
+];
+
 import {
     getBotStatusSettings,
     saveBotStatusSettings
@@ -2552,6 +2587,9 @@ app.get(
                                     botMember.roles.highest.position ||
                                 role.permissions.has(
                                     "Administrator"
+                                ) ||
+                                PROTECTED_ROLE_IDS.includes(
+                                    role.id
                                 );
 
                             return {
@@ -2673,6 +2711,18 @@ function getSafeRoleForDashboard(
             ok: false,
             error:
                 "Administrator roles are protected."
+        };
+    }
+
+    if (
+        PROTECTED_ROLE_IDS.includes(
+            role.id
+        )
+    ) {
+        return {
+            ok: false,
+            error:
+                "That role is protected and cannot be managed through the dashboard."
         };
     }
 
