@@ -14,33 +14,72 @@ const rest =
     );
 
 
-try {
+async function clearCommands() {
 
-    console.log(
-        "🧹 Clearing all global slash commands..."
-    );
+    try {
 
-
-    await rest.put(
-        Routes.applicationCommands(
-            process.env.CLIENT_ID
-        ),
-        {
-            body: []
-        }
-    );
+        console.log(
+            "🧹 Clearing GLOBAL slash commands..."
+        );
 
 
-    console.log(
-        "✅ All global slash commands have been removed."
-    );
+        await rest.put(
+            Routes.applicationCommands(
+                process.env.CLIENT_ID
+            ),
+            {
+                body: []
+            }
+        );
 
 
-} catch (error) {
+        console.log(
+            "✅ Global slash commands cleared."
+        );
 
-    console.error(
-        "❌ Failed to clear slash commands:",
-        error
-    );
 
+        console.log(
+            "🧹 Clearing SERVER slash commands..."
+        );
+
+
+        await rest.put(
+            Routes.applicationGuildCommands(
+                process.env.CLIENT_ID,
+                process.env.GUILD_ID
+            ),
+            {
+                body: []
+            }
+        );
+
+
+        console.log(
+            "✅ Server slash commands cleared."
+        );
+
+
+        console.log(
+            "======================================"
+        );
+
+        console.log(
+            "✅ ALL COMMANDS HAVE BEEN CLEARED"
+        );
+
+        console.log(
+            "======================================"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Failed to clear commands:",
+            error
+        );
+    }
 }
+
+
+clearCommands();
