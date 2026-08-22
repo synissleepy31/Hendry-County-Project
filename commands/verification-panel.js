@@ -16,7 +16,7 @@ import sharp from "sharp";
 // VERIFICATION SETTINGS
 // ======================================================
 
-const VERIFIED_ROLE_ID = "1540655905337516212";
+const VERIFIED_ROLE_ID = "1533590255624523830";
 
 const CAPTCHA_TIMEOUT = 2 * 60 * 1000;
 
