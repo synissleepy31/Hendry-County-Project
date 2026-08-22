@@ -4,9 +4,7 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle
+    MessageFlags
 } from "discord.js";
 
 
@@ -49,7 +47,7 @@ const ROLE_REQUEST_DEPARTMENTS = {
 };
 
 
-export const data =
+const data =
     new SlashCommandBuilder()
 
         .setName(
@@ -61,63 +59,30 @@ export const data =
         )
 
 
-export const data =
-    new SlashCommandBuilder()
-
-        .setName("rolerequest")
-
-        .setDescription(
-            "Request a Discord role from your department."
-        )
+        // ==================================================
+        // ROLE PICKER
+        // ==================================================
 
         .addRoleOption(option =>
+
             option
-                .setName("role")
+                .setName(
+                    "role"
+                )
+
                 .setDescription(
                     "Select the role you are requesting."
                 )
-                .setRequired(true)
-        )
 
-        .addStringOption(option =>
-            option
-                .setName("department")
-                .setDescription(
-                    "The department this request is for."
-                )
-                .setRequired(true)
-                .addChoices(
-                    {
-                        name:
-                            "Clewiston Police Department (CPD)",
-                        value:
-                            "CPD"
-                    },
-                    {
-                        name:
-                            "Hendry County Sheriff's Office (HCSO)",
-                        value:
-                            "HCSO"
-                    },
-                    {
-                        name:
-                            "Florida Highway Patrol (FHP)",
-                        value:
-                            "FHP"
-                    }
+                .setRequired(
+                    true
                 )
         )
 
-        .addStringOption(option =>
-            option
-                .setName("reason")
-                .setDescription(
-                    "Why are you requesting this role?"
-                )
-                .setRequired(true)
-                .setMaxLength(1000)
-        );
 
+        // ==================================================
+        // DEPARTMENT
+        // ==================================================
 
         .addStringOption(option =>
 
@@ -127,7 +92,7 @@ export const data =
                 )
 
                 .setDescription(
-                    "The department this request is for."
+                    "Select the department this role request is for."
                 )
 
                 .setRequired(
@@ -162,6 +127,10 @@ export const data =
                 )
         )
 
+
+        // ==================================================
+        // REASON
+        // ==================================================
 
         .addStringOption(option =>
 
@@ -184,7 +153,8 @@ export const data =
         );
 
 
-export async function execute(interaction) {
+
+async function execute(interaction) {
 
     try {
 
@@ -218,11 +188,15 @@ export async function execute(interaction) {
                 content:
                     "❌ Invalid department.",
 
-                ephemeral:
-                    true
+                flags:
+                    MessageFlags.Ephemeral
             });
         }
 
+
+        // ==================================================
+        // BASIC ROLE SAFETY
+        // ==================================================
 
         if (
             requestedRole.id ===
@@ -233,8 +207,8 @@ export async function execute(interaction) {
                 content:
                     "❌ You cannot request the @everyone role.",
 
-                ephemeral:
-                    true
+                flags:
+                    MessageFlags.Ephemeral
             });
         }
 
@@ -245,13 +219,33 @@ export async function execute(interaction) {
 
             return interaction.reply({
                 content:
-                    "❌ That role is managed by another integration and cannot be requested.",
+                    "❌ That role is managed by a bot or integration and cannot be requested.",
 
-                ephemeral:
-                    true
+                flags:
+                    MessageFlags.Ephemeral
             });
         }
 
+
+        if (
+            interaction.member.roles.cache.has(
+                requestedRole.id
+            )
+        ) {
+
+            return interaction.reply({
+                content:
+                    "❌ You already have that role.",
+
+                flags:
+                    MessageFlags.Ephemeral
+            });
+        }
+
+
+        // ==================================================
+        // REQUEST CHANNEL
+        // ==================================================
 
         const channel =
             await interaction.guild.channels.fetch(
@@ -268,17 +262,25 @@ export async function execute(interaction) {
                 content:
                     "❌ The role request channel for that department could not be found.",
 
-                ephemeral:
-                    true
+                flags:
+                    MessageFlags.Ephemeral
             });
         }
 
+
+        // ==================================================
+        // REQUEST ID
+        // ==================================================
 
         const requestId =
             `${interaction.user.id}-${Date.now()}`;
 
 
-        const embed =
+        // ==================================================
+        // REQUEST EMBED
+        // ==================================================
+
+        const requestEmbed =
             new EmbedBuilder()
 
                 .setColor(
@@ -337,16 +339,27 @@ export async function execute(interaction) {
                     }
                 )
 
+                .setThumbnail(
+                    interaction.user.displayAvatarURL({
+                        size: 256
+                    })
+                )
+
                 .setFooter({
                     text:
-                        `Request ID: ${requestId}`
+                        `Hendry County Project • Request ID: ${requestId}`
                 })
 
                 .setTimestamp();
 
 
+        // ==================================================
+        // BUTTONS
+        // ==================================================
+
         const buttons =
             new ActionRowBuilder()
+
                 .addComponents(
 
                     new ButtonBuilder()
@@ -357,6 +370,10 @@ export async function execute(interaction) {
 
                         .setLabel(
                             "Accept"
+                        )
+
+                        .setEmoji(
+                            "✅"
                         )
 
                         .setStyle(
@@ -374,29 +391,52 @@ export async function execute(interaction) {
                             "Deny"
                         )
 
+                        .setEmoji(
+                            "❌"
+                        )
+
                         .setStyle(
                             ButtonStyle.Danger
                         )
                 );
 
 
+        // ==================================================
+        // SEND REQUEST
+        // ==================================================
+
         await channel.send({
+
+            content:
+                `<@&${department.highCommandRoleId}>`,
+
             embeds: [
-                embed
+                requestEmbed
             ],
 
             components: [
                 buttons
-            ]
+            ],
+
+            allowedMentions: {
+                roles: [
+                    department.highCommandRoleId
+                ]
+            }
         });
 
 
-        await interaction.reply({
-            content:
-                `✅ Your role request for ${requestedRole} has been sent to ${department.name} High Command.`,
+        // ==================================================
+        // USER CONFIRMATION
+        // ==================================================
 
-            ephemeral:
-                true
+        return interaction.reply({
+
+            content:
+                `✅ Your request for ${requestedRole} has been sent to **${department.name} High Command**.`,
+
+            flags:
+                MessageFlags.Ephemeral
         });
 
 
@@ -417,8 +457,8 @@ export async function execute(interaction) {
                 content:
                     "❌ Something went wrong while submitting your role request.",
 
-                ephemeral:
-                    true
+                flags:
+                    MessageFlags.Ephemeral
             });
         }
 
@@ -427,8 +467,14 @@ export async function execute(interaction) {
             content:
                 "❌ Something went wrong while submitting your role request.",
 
-            ephemeral:
-                true
+            flags:
+                MessageFlags.Ephemeral
         });
     }
 }
+
+
+export default {
+    data,
+    execute
+};
