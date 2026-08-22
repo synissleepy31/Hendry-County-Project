@@ -1,0 +1,103 @@
+<%- include("partials/head", { title: post.title }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+
+<main class="page-container news-article-page">
+
+    <a
+        href="/news"
+        class="news-back"
+    >
+        ← Back to News
+    </a>
+
+
+    <article class="news-article">
+
+        <header class="news-article-header">
+
+            <p class="eyebrow">
+                HENDRY COUNTY PROJECT NEWS
+            </p>
+
+
+            <h1>
+                <%= post.title %>
+            </h1>
+
+
+            <p class="news-article-summary">
+                <%= post.summary %>
+            </p>
+
+
+            <div class="news-article-meta">
+
+                <span>
+                    By <%= post.author %>
+                </span>
+
+                <span>
+                    •
+                </span>
+
+                <time>
+                    <%= new Date(post.createdAt).toLocaleDateString(
+                        "en-GB",
+                        {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric"
+                        }
+                    ) %>
+                </time>
+
+            </div>
+
+        </header>
+
+
+        <% if (post.image) { %>
+
+            <div class="news-article-image">
+
+                <img
+                    src="<%= post.image %>"
+                    alt="<%= post.title %>"
+                >
+
+            </div>
+
+        <% } %>
+
+
+        <div class="news-article-content">
+
+            <% String(post.content || "")
+                .split("\n")
+                .forEach(paragraph => { %>
+
+                <% if (paragraph.trim()) { %>
+
+                    <p>
+                        <%= paragraph %>
+                    </p>
+
+                <% } %>
+
+            <% }) %>
+
+        </div>
+
+    </article>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+
+</body>
+</html>

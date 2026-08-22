@@ -1,0 +1,355 @@
+<%- include("partials/head", { title: "Moderation" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            MODERATION
+        </p>
+
+        <h1>
+            Moderation
+            <span>Management</span>
+        </h1>
+
+        <p class="page-description">
+            Manage members, warnings, bans and blacklists
+            from the Hendry County Project dashboard.
+        </p>
+
+    </section>
+
+
+    <div
+        id="moderationMessage"
+        class="moderation-message"
+    ></div>
+
+
+    <section class="moderation-layout">
+
+        <!-- ============================================= -->
+        <!-- LEFT SIDE -->
+        <!-- ============================================= -->
+
+        <div class="moderation-main">
+
+            <!-- MEMBER ACTIONS -->
+
+            <section class="moderation-card">
+
+                <div class="moderation-card-heading">
+
+                    <div>
+                        <p class="eyebrow">
+                            MEMBER ACTIONS
+                        </p>
+
+                        <h2>
+                            Moderate a Member
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="moderation-field">
+
+                    <label for="memberSelect">
+                        Member
+                    </label>
+
+                    <select id="memberSelect">
+
+                        <option value="">
+                            Select a member...
+                        </option>
+
+                        <% members.forEach(member => { %>
+
+                            <option value="<%= member.id %>">
+                                <%= member.displayName %>
+                                (@<%= member.username %>)
+                            </option>
+
+                        <% }) %>
+
+                    </select>
+
+                </div>
+
+
+                <div class="moderation-field">
+
+                    <label for="moderationReason">
+                        Reason
+                    </label>
+
+                    <textarea
+                        id="moderationReason"
+                        rows="4"
+                        placeholder="Enter the moderation reason..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="moderation-actions">
+
+                    <button
+                        type="button"
+                        class="moderation-action warning"
+                        data-action="warning"
+                    >
+                        ⚠️ Warn
+                    </button>
+
+                    <button
+                        type="button"
+                        class="moderation-action kick"
+                        data-action="kick"
+                    >
+                        👢 Kick
+                    </button>
+
+                    <button
+                        type="button"
+                        class="moderation-action ban"
+                        data-action="ban"
+                    >
+                        🔨 Ban
+                    </button>
+
+                    <button
+                        type="button"
+                        class="moderation-action blacklist"
+                        data-action="blacklist"
+                    >
+                        🚫 Blacklist
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- TEMP BAN -->
+
+            <section class="moderation-card">
+
+                <div class="moderation-card-heading">
+
+                    <div>
+                        <p class="eyebrow">
+                            TEMPORARY BAN
+                        </p>
+
+                        <h2>
+                            Temporary Suspension
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="moderation-form-grid">
+
+                    <div class="moderation-field">
+
+                        <label for="tempMemberSelect">
+                            Member
+                        </label>
+
+                        <select id="tempMemberSelect">
+
+                            <option value="">
+                                Select a member...
+                            </option>
+
+                            <% members.forEach(member => { %>
+
+                                <option value="<%= member.id %>">
+                                    <%= member.displayName %>
+                                    (@<%= member.username %>)
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="moderation-field">
+
+                        <label for="tempDuration">
+                            Duration
+                        </label>
+
+                        <input
+                            id="tempDuration"
+                            type="text"
+                            placeholder="Examples: 30m, 6h, 2d, 1w"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="moderation-field">
+
+                    <label for="tempReason">
+                        Reason
+                    </label>
+
+                    <textarea
+                        id="tempReason"
+                        rows="3"
+                        placeholder="Enter the temporary ban reason..."
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    id="tempBanButton"
+                    type="button"
+                    class="moderation-submit-button"
+                >
+                    ⏳ Temporarily Ban Member
+                </button>
+
+            </section>
+
+
+            <!-- WARNING CHECK -->
+
+            <section class="moderation-card">
+
+                <div class="moderation-card-heading">
+
+                    <div>
+                        <p class="eyebrow">
+                            WARNINGS
+                        </p>
+
+                        <h2>
+                            Check Member Warnings
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="moderation-form-grid">
+
+                    <div class="moderation-field">
+
+                        <label for="warningMemberSelect">
+                            Member
+                        </label>
+
+                        <select id="warningMemberSelect">
+
+                            <option value="">
+                                Select a member...
+                            </option>
+
+                            <% members.forEach(member => { %>
+
+                                <option value="<%= member.id %>">
+                                    <%= member.displayName %>
+                                    (@<%= member.username %>)
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="moderation-warning-button-wrap">
+
+                        <button
+                            id="checkWarningsButton"
+                            type="button"
+                            class="moderation-secondary-button"
+                        >
+                            Check Warnings
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="warningResults"
+                    class="warning-results"
+                >
+                    <p class="warning-empty">
+                        Select a member to view their warnings.
+                    </p>
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- RIGHT SIDE -->
+        <!-- ============================================= -->
+
+        <aside class="moderation-sidebar">
+
+            <section class="moderation-card">
+
+                <p class="eyebrow">
+                    MODERATION
+                </p>
+
+                <h2>
+                    Quick Links
+                </h2>
+
+                <div class="moderation-links">
+
+                    <a href="/dashboard/patrol-announcements">
+                        🚓 Patrol Announcements
+                    </a>
+
+                    <a href="/dashboard/cases">
+                        📁 Cases
+                    </a>
+
+                    <a href="/dashboard/logs">
+                        📋 Logs
+                    </a>
+
+                    <a href="/dashboard/commands">
+                        ⚡ Commands
+                    </a>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </section>
+
+</main>
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/moderation.js"></script>
+
+</body>
+</html>

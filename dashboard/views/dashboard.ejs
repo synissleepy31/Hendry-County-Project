@@ -1,0 +1,193 @@
+<%- include("partials/head", { title: "Dashboard" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            HCP BOT MANAGEMENT
+        </p>
+
+        <h1>
+            Welcome back,
+            <span><%= user.displayName %></span>
+        </h1>
+
+        <p class="page-description">
+            Manage the Hendry County Project Discord bot
+            from one central control panel.
+        </p>
+
+    </section>
+
+    <section class="status-grid">
+
+        <div class="status-card">
+
+            <div class="status-icon">●</div>
+
+            <div>
+                <span class="card-label">
+                    BOT STATUS
+                </span>
+
+                <h3>
+                    <%= bot.online ? "Online" : "Offline" %>
+                </h3>
+
+                <p class="online">
+                    ● Connected
+                </p>
+            </div>
+
+        </div>
+
+        <div class="status-card">
+
+            <div class="status-icon">◉</div>
+
+            <div>
+                <span class="card-label">
+                    SERVERS
+                </span>
+
+                <h3><%= bot.servers %></h3>
+
+                <p>
+                    Connected servers
+                </p>
+            </div>
+
+        </div>
+
+        <div class="status-card">
+
+            <div class="status-icon">⚡</div>
+
+            <div>
+                <span class="card-label">
+                    COMMANDS
+                </span>
+
+                <h3><%= bot.commands %></h3>
+
+                <p>
+                    Loaded commands
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="management-section">
+
+        <div class="section-heading">
+
+            <p class="eyebrow">
+                CONTROL CENTER
+            </p>
+
+            <h2>
+                Control your server.
+            </h2>
+
+            <p>
+                Select an area to manage the
+                Hendry County Project bot.
+            </p>
+
+        </div>
+
+        <div class="management-grid">
+
+            <a
+                href="/dashboard/commands"
+                class="management-card"
+            >
+                <div class="management-card-icon">
+                    ⚡
+                </div>
+
+                <div>
+                    <span>BOT</span>
+                    <h3>Commands</h3>
+                    <p>
+                        Create and configure bot commands.
+                    </p>
+                </div>
+
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a
+                href="/dashboard/moderation"
+                class="management-card"
+            >
+                <div class="management-card-icon">
+                    ◆
+                </div>
+
+                <div>
+                    <span>STAFF</span>
+                    <h3>Moderation</h3>
+                    <p>
+                        Manage members and moderation.
+                    </p>
+                </div>
+
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a
+                href="/dashboard/announcements"
+                class="management-card"
+            >
+                <div class="management-card-icon">
+                    ◀
+                </div>
+
+                <div>
+                    <span>MANAGEMENT</span>
+                    <h3>Announcements</h3>
+                    <p>
+                        Send messages to your Discord.
+                    </p>
+                </div>
+
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a
+                href="/dashboard/welcome"
+                class="management-card"
+            >
+                <div class="management-card-icon">
+                    ✦
+                </div>
+
+                <div>
+                    <span>CONFIGURATION</span>
+                    <h3>Welcome Editor</h3>
+                    <p>
+                        Configure member welcome settings.
+                    </p>
+                </div>
+
+                <div class="card-arrow">→</div>
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/public/js/dashboard.js"></script>
+
+</body>
+</html>

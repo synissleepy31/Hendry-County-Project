@@ -1,0 +1,379 @@
+<%- include("partials/head", { title: "Announcements" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            MANAGEMENT
+        </p>
+
+        <h1>
+            Announcement
+            <span>Builder</span>
+        </h1>
+
+        <p class="page-description">
+            Build, preview and send custom Discord announcement embeds
+            from the Hendry County Project dashboard.
+        </p>
+
+    </section>
+
+
+    <div
+        id="announcementMessage"
+        class="announcement-message"
+    ></div>
+
+
+    <div class="announcement-editor-layout">
+
+        <!-- =============================================== -->
+        <!-- LEFT SIDE -->
+        <!-- =============================================== -->
+
+        <div class="announcement-editor">
+
+            <!-- DESTINATION -->
+
+            <section class="announcement-card">
+
+                <p class="eyebrow">
+                    DESTINATION
+                </p>
+
+                <h2>
+                    Discord Destination
+                </h2>
+
+
+                <div class="announcement-form-grid">
+
+                    <div class="announcement-field">
+
+                        <label for="announcementChannel">
+                            Channel
+                        </label>
+
+                        <select id="announcementChannel">
+
+                            <option value="">
+                                Select a channel...
+                            </option>
+
+                            <% channels.forEach(channel => { %>
+
+                                <option value="<%= channel.id %>">
+                                    # <%= channel.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="announcement-field">
+
+                        <label for="announcementRole">
+                            Role Ping
+                        </label>
+
+                        <select id="announcementRole">
+
+                            <option value="">
+                                No role ping
+                            </option>
+
+                            <% roles.forEach(role => { %>
+
+                                <option value="<%= role.id %>">
+                                    @<%= role.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- EMBED CONTENT -->
+
+            <section class="announcement-card">
+
+                <p class="eyebrow">
+                    EMBED CONTENT
+                </p>
+
+                <h2>
+                    Announcement Embed
+                </h2>
+
+
+                <div class="announcement-field">
+
+                    <label for="announcementTitle">
+                        Title
+                    </label>
+
+                    <input
+                        id="announcementTitle"
+                        type="text"
+                        placeholder="Server Announcement"
+                    >
+
+                </div>
+
+
+                <div class="announcement-field">
+
+                    <label for="announcementDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="announcementDescription"
+                        rows="8"
+                        placeholder="Write your announcement here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="announcement-form-grid">
+
+                    <div class="announcement-field">
+
+                        <label for="announcementColor">
+                            Embed Colour
+                        </label>
+
+                        <div class="announcement-color-field">
+
+                            <input
+                                id="announcementColorPicker"
+                                type="color"
+                                value="#ff8534"
+                            >
+
+                            <input
+                                id="announcementColor"
+                                type="text"
+                                value="#ff8534"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="announcement-field">
+
+                        <label for="announcementFooter">
+                            Footer
+                        </label>
+
+                        <input
+                            id="announcementFooter"
+                            type="text"
+                            value="Hendry County Project"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="announcement-field">
+
+                    <label for="announcementImage">
+                        Large Image URL
+                    </label>
+
+                    <input
+                        id="announcementImage"
+                        type="url"
+                        placeholder="https://example.com/image.png"
+                    >
+
+                </div>
+
+
+                <div class="announcement-field">
+
+                    <label for="announcementThumbnail">
+                        Thumbnail URL
+                    </label>
+
+                    <input
+                        id="announcementThumbnail"
+                        type="url"
+                        placeholder="https://example.com/logo.png"
+                    >
+
+                </div>
+
+
+                <label class="announcement-toggle">
+
+                    <input
+                        id="announcementTimestamp"
+                        type="checkbox"
+                        checked
+                    >
+
+                    <div>
+
+                        <strong>
+                            Show Timestamp
+                        </strong>
+
+                        <small>
+                            Add the current Discord timestamp to the embed.
+                        </small>
+
+                    </div>
+
+                </label>
+
+            </section>
+
+
+            <!-- SEND -->
+
+            <button
+                id="sendAnnouncement"
+                type="button"
+                class="announcement-send-button"
+            >
+                Send Announcement
+            </button>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- PREVIEW -->
+        <!-- =============================================== -->
+
+        <aside class="announcement-preview-column">
+
+            <div class="announcement-preview-sticky">
+
+                <p class="eyebrow">
+                    LIVE PREVIEW
+                </p>
+
+                <h2>
+                    Discord Preview
+                </h2>
+
+
+                <div class="announcement-discord-preview">
+
+                    <div class="announcement-discord-author">
+
+                        <img
+                            src="/public/images/hcp-main.png"
+                            alt="HCP"
+                        >
+
+                        <div>
+
+                            <strong>
+                                Hendry County Project
+                            </strong>
+
+                            <span class="announcement-app">
+                                APP
+                            </span>
+
+                            <small>
+                                Today at 12:00
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="previewAnnouncementPing"
+                        class="announcement-role-ping"
+                        style="display:none;"
+                    >
+                        @Role
+                    </div>
+
+
+                    <div
+                        id="previewAnnouncementEmbed"
+                        class="announcement-preview-embed"
+                        data-color="#ff8534"
+                    >
+
+                        <h3 id="previewAnnouncementTitle">
+                            Server Announcement
+                        </h3>
+
+
+                        <div
+                            id="previewAnnouncementDescription"
+                            class="announcement-preview-description"
+                        >
+                            Your announcement preview will appear here.
+                        </div>
+
+
+                        <img
+                            id="previewAnnouncementThumbnail"
+                            class="announcement-preview-thumbnail"
+                            alt=""
+                            style="display:none;"
+                        >
+
+
+                        <img
+                            id="previewAnnouncementImage"
+                            class="announcement-preview-image"
+                            alt=""
+                            style="display:none;"
+                        >
+
+
+                        <div
+                            id="previewAnnouncementFooter"
+                            class="announcement-preview-footer"
+                        >
+                            Hendry County Project
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/announcements.js"></script>
+
+</body>
+</html>

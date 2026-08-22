@@ -1,0 +1,256 @@
+<%- include("partials/head", { title: "Settings" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container settings-page">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            CONFIGURATION
+        </p>
+
+        <h1>
+            Bot
+            <span>Settings</span>
+        </h1>
+
+        <p class="page-description">
+            Configure global dashboard and bot defaults
+            for the Hendry County Project.
+        </p>
+
+    </section>
+
+
+    <div
+        id="settingsMessage"
+        class="settings-message"
+    ></div>
+
+
+    <section class="settings-grid">
+
+        <article class="settings-card">
+
+            <p class="eyebrow">
+                GENERAL
+            </p>
+
+            <h2>
+                Dashboard Settings
+            </h2>
+
+
+            <div class="settings-field">
+
+                <label for="dashboardTitle">
+                    Dashboard Title
+                </label>
+
+                <input
+                    id="dashboardTitle"
+                    type="text"
+                    maxlength="80"
+                    value="<%= settings.dashboardTitle %>"
+                >
+
+            </div>
+
+
+            <div class="settings-field">
+
+                <label for="timezone">
+                    Timezone
+                </label>
+
+                <select id="timezone">
+
+                    <option
+                        value="Europe/London"
+                        <%= settings.timezone === "Europe/London" ? "selected" : "" %>
+                    >
+                        Europe/London
+                    </option>
+
+                    <option
+                        value="America/Chicago"
+                        <%= settings.timezone === "America/Chicago" ? "selected" : "" %>
+                    >
+                        America/Chicago
+                    </option>
+
+                    <option
+                        value="America/New_York"
+                        <%= settings.timezone === "America/New_York" ? "selected" : "" %>
+                    >
+                        America/New_York
+                    </option>
+
+                    <option
+                        value="America/Los_Angeles"
+                        <%= settings.timezone === "America/Los_Angeles" ? "selected" : "" %>
+                    >
+                        America/Los_Angeles
+                    </option>
+
+                </select>
+
+            </div>
+
+        </article>
+
+
+        <article class="settings-card">
+
+            <p class="eyebrow">
+                EMBED DEFAULTS
+            </p>
+
+            <h2>
+                Discord Styling
+            </h2>
+
+
+            <div class="settings-field">
+
+                <label for="embedColor">
+                    Default Embed Colour
+                </label>
+
+                <div class="color-row">
+
+                    <input
+                        id="embedColorPicker"
+                        type="color"
+                        value="<%= settings.embedColor %>"
+                    >
+
+                    <input
+                        id="embedColor"
+                        type="text"
+                        maxlength="7"
+                        value="<%= settings.embedColor %>"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="settings-field">
+
+                <label for="defaultFooter">
+                    Default Embed Footer
+                </label>
+
+                <input
+                    id="defaultFooter"
+                    type="text"
+                    maxlength="150"
+                    value="<%= settings.defaultFooter %>"
+                >
+
+            </div>
+
+        </article>
+
+
+        <article class="settings-card">
+
+            <p class="eyebrow">
+                LOGGING
+            </p>
+
+            <h2>
+                Log Channel
+            </h2>
+
+
+            <div class="settings-field">
+
+                <label for="logChannelId">
+                    Discord Log Channel
+                </label>
+
+                <select id="logChannelId">
+
+                    <option value="">
+                        No log channel
+                    </option>
+
+                    <% channels.forEach(channel => { %>
+
+                        <option
+                            value="<%= channel.id %>"
+                            <%= settings.logChannelId === channel.id ? "selected" : "" %>
+                        >
+                            #<%= channel.name %>
+                        </option>
+
+                    <% }) %>
+
+                </select>
+
+            </div>
+
+        </article>
+
+
+        <article class="settings-card">
+
+            <p class="eyebrow">
+                SYSTEM
+            </p>
+
+            <h2>
+                Maintenance Mode
+            </h2>
+
+
+            <label class="maintenance-row">
+
+                <div>
+
+                    <strong>
+                        Dashboard Maintenance
+                    </strong>
+
+                    <span>
+                        Temporarily disable normal dashboard usage.
+                    </span>
+
+                </div>
+
+
+                <input
+                    id="maintenanceMode"
+                    type="checkbox"
+                    <%= settings.maintenanceMode ? "checked" : "" %>
+                >
+
+            </label>
+
+        </article>
+
+    </section>
+
+
+    <button
+        id="saveSettings"
+        type="button"
+        class="save-settings-button"
+    >
+        Save Settings
+    </button>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/settings.js"></script>
+
+</body>
+</html>

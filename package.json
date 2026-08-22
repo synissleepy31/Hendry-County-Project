@@ -1,0 +1,21 @@
+{
+  "name": "hendry-county-project",
+  "version": "1.0.0",
+  "description": "Hendry County Project Discord Bot",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "dotenv": "^16.0.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "lavalink-client": "^2.11.0",
+    "mediaplex": "^1.0.0",
+    "sharp": "^0.35.3",
+    "svg-captcha": "^1.4.0"
+  }
+}

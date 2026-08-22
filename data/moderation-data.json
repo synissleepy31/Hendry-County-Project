@@ -1,0 +1,16 @@
+{
+    "warnings": [
+        {
+            "id": "1787395894198",
+            "guildId": "1533869053729571027",
+            "userId": "967375704486449222",
+            "username": "synissleepy",
+            "moderatorId": "967375704486449222",
+            "moderatorName": "synissleepy",
+            "reason": "test",
+            "createdAt": 1787395894198
+        }
+    ],
+    "tempBans": [],
+    "blacklist": []
+}

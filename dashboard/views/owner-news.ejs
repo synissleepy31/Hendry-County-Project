@@ -1,0 +1,372 @@
+<%- include("partials/head", { title: "News Management" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container owner-news-page">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            OWNER CONTROL CENTER
+        </p>
+
+        <h1>
+            News
+            <span>Management</span>
+        </h1>
+
+        <p class="page-description">
+            Create, edit and publish news articles shown
+            on the public Hendry County Project website.
+        </p>
+
+    </section>
+
+
+    <div
+        id="newsMessage"
+        class="news-manager-message"
+    ></div>
+
+
+    <!-- ================================================= -->
+    <!-- CREATE / EDIT ARTICLE -->
+    <!-- ================================================= -->
+
+    <section class="news-manager-card">
+
+        <div class="news-manager-heading">
+
+            <div>
+
+                <p class="eyebrow">
+                    ARTICLE EDITOR
+                </p>
+
+                <h2 id="editorHeading">
+                    Create News Article
+                </h2>
+
+            </div>
+
+
+            <button
+                id="cancelEditButton"
+                type="button"
+                class="news-secondary-button"
+                hidden
+            >
+                Cancel Editing
+            </button>
+
+        </div>
+
+
+        <input
+            id="editingArticleId"
+            type="hidden"
+            value=""
+        >
+
+
+        <div class="news-editor-grid">
+
+            <div class="news-editor-field">
+
+                <label for="newsTitle">
+                    Article Title
+                </label>
+
+                <input
+                    id="newsTitle"
+                    type="text"
+                    maxlength="150"
+                    placeholder="Server Development Update"
+                >
+
+            </div>
+
+
+            <div class="news-editor-field">
+
+                <label for="newsImage">
+                    Header Image URL
+                </label>
+
+                <input
+                    id="newsImage"
+                    type="url"
+                    placeholder="https://..."
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="news-editor-field">
+
+            <label for="newsSummary">
+                Article Summary
+            </label>
+
+            <textarea
+                id="newsSummary"
+                maxlength="500"
+                rows="3"
+                placeholder="Write a short description that will appear on the News page..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="news-editor-field">
+
+            <label for="newsContent">
+                Article Content
+            </label>
+
+            <textarea
+                id="newsContent"
+                rows="12"
+                placeholder="Write the full news article here..."
+            ></textarea>
+
+        </div>
+
+
+        <label class="news-publish-setting">
+
+            <div>
+
+                <strong>
+                    Publish Article
+                </strong>
+
+                <span>
+                    Published articles are immediately visible on the public News page.
+                </span>
+
+            </div>
+
+            <input
+                id="newsPublished"
+                type="checkbox"
+                checked
+            >
+
+        </label>
+
+
+        <button
+            id="saveNewsButton"
+            type="button"
+            class="news-primary-button"
+        >
+            Publish Article
+        </button>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- EXISTING ARTICLES -->
+    <!-- ================================================= -->
+
+    <section class="news-manager-card">
+
+        <div class="news-manager-heading">
+
+            <div>
+
+                <p class="eyebrow">
+                    NEWS ARCHIVE
+                </p>
+
+                <h2>
+                    Existing Articles
+                </h2>
+
+            </div>
+
+            <span class="news-article-count">
+                <%= posts.length %>
+                article<%= posts.length === 1 ? "" : "s" %>
+            </span>
+
+        </div>
+
+
+        <div
+            id="newsArticleList"
+            class="news-manager-list"
+        >
+
+            <% if (!posts.length) { %>
+
+                <div class="news-manager-empty">
+
+                    <div>
+                        📰
+                    </div>
+
+                    <strong>
+                        No articles yet
+                    </strong>
+
+                    <span>
+                        Create your first HCP news article above.
+                    </span>
+
+                </div>
+
+            <% } %>
+
+
+            <% posts.forEach(post => { %>
+
+                <article
+                    class="news-manager-item"
+                    data-id="<%= post.id %>"
+                >
+
+                    <div class="news-manager-item-main">
+
+                        <% if (post.image) { %>
+
+                            <img
+                                class="news-manager-thumbnail"
+                                src="<%= post.image %>"
+                                alt=""
+                            >
+
+                        <% } else { %>
+
+                            <div class="news-manager-thumbnail news-no-image">
+                                📰
+                            </div>
+
+                        <% } %>
+
+
+                        <div class="news-manager-details">
+
+                            <div class="news-manager-status-row">
+
+                                <% if (post.published) { %>
+
+                                    <span class="news-status published">
+                                        Published
+                                    </span>
+
+                                <% } else { %>
+
+                                    <span class="news-status draft">
+                                        Draft
+                                    </span>
+
+                                <% } %>
+
+
+                                <span class="news-date">
+                                    <%= new Date(post.createdAt).toLocaleDateString(
+                                        "en-GB",
+                                        {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric"
+                                        }
+                                    ) %>
+                                </span>
+
+                            </div>
+
+
+                            <h3>
+                                <%= post.title %>
+                            </h3>
+
+
+                            <p>
+                                <%= post.summary || "No article summary." %>
+                            </p>
+
+
+                            <small>
+                                Written by <%= post.author %>
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="news-manager-actions">
+
+                        <% if (post.published) { %>
+
+                            <a
+                                href="/news/<%= post.slug %>"
+                                target="_blank"
+                                class="news-action-button"
+                            >
+                                View
+                            </a>
+
+                        <% } %>
+
+
+                        <button
+                            type="button"
+                            class="news-action-button edit-news-button"
+
+                            data-id="<%= post.id %>"
+                            data-title="<%= post.title %>"
+                            data-summary="<%= post.summary || "" %>"
+                            data-content="<%= post.content || "" %>"
+                            data-image="<%= post.image || "" %>"
+                            data-published="<%= post.published ? "true" : "false" %>"
+                        >
+                            Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="news-action-button publish-news-button"
+                            data-id="<%= post.id %>"
+                            data-published="<%= post.published ? "true" : "false" %>"
+                        >
+                            <%= post.published ? "Unpublish" : "Publish" %>
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="news-action-button danger delete-news-button"
+                            data-id="<%= post.id %>"
+                            data-title="<%= post.title %>"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </article>
+
+            <% }) %>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/owner-news.js"></script>
+
+</body>
+</html>

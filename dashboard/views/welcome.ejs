@@ -1,0 +1,526 @@
+<%- include("partials/head", { title: "Welcome Editor" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            CONFIGURATION
+        </p>
+
+        <h1>
+            Welcome
+            <span>Editor</span>
+        </h1>
+
+        <p class="page-description">
+            Configure how new members are welcomed
+            to the Hendry County Project Discord server.
+        </p>
+
+    </section>
+
+
+    <div
+        id="welcomeMessage"
+        class="welcome-save-message"
+    ></div>
+
+
+    <div class="welcome-editor-layout">
+
+        <!-- =============================================== -->
+        <!-- SETTINGS -->
+        <!-- =============================================== -->
+
+        <div class="welcome-editor">
+
+
+            <!-- GENERAL -->
+
+            <section class="welcome-config-card">
+
+                <p class="eyebrow">
+                    GENERAL
+                </p>
+
+                <h2>
+                    Welcome System
+                </h2>
+
+
+                <label class="welcome-toggle">
+
+                    <input
+                        id="welcomeEnabled"
+                        type="checkbox"
+                        <%= settings.enabled ? "checked" : "" %>
+                    >
+
+                    <div>
+                        <strong>
+                            Enable Welcome Messages
+                        </strong>
+
+                        <small>
+                            Send a welcome message when
+                            somebody joins the server.
+                        </small>
+                    </div>
+
+                </label>
+
+
+                <div class="welcome-field">
+
+                    <label for="welcomeChannel">
+                        Welcome Channel
+                    </label>
+
+                    <select id="welcomeChannel">
+
+                        <option value="">
+                            Select a channel...
+                        </option>
+
+                        <% channels.forEach(channel => { %>
+
+                            <option
+                                value="<%= channel.id %>"
+                                <%= settings.channelId === channel.id ? "selected" : "" %>
+                            >
+                                # <%= channel.name %>
+                            </option>
+
+                        <% }) %>
+
+                    </select>
+
+                </div>
+
+
+                <label class="welcome-toggle">
+
+                    <input
+                        id="pingUser"
+                        type="checkbox"
+                        <%= settings.pingUser ? "checked" : "" %>
+                    >
+
+                    <div>
+                        <strong>
+                            Allow Member Ping
+                        </strong>
+
+                        <small>
+                            Allow the welcome embed to mention
+                            the member who just joined.
+                        </small>
+                    </div>
+
+                </label>
+
+            </section>
+
+
+            <!-- EMBED -->
+
+            <section class="welcome-config-card">
+
+                <p class="eyebrow">
+                    EMBED
+                </p>
+
+                <h2>
+                    Welcome Embed
+                </h2>
+
+
+                <div class="welcome-field">
+
+                    <label for="embedTitle">
+                        Title
+                    </label>
+
+                    <input
+                        id="embedTitle"
+                        type="text"
+                        value="<%= settings.embedTitle %>"
+                    >
+
+                    <small>
+                        Available:
+                        {username}
+                    </small>
+
+                </div>
+
+
+                <div class="welcome-field">
+
+                    <label for="embedDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="embedDescription"
+                        rows="5"
+                    ><%= settings.embedDescription %></textarea>
+
+                    <small>
+                        Available:
+                        {username},
+                        {mention},
+                        {memberNumber}
+                    </small>
+
+                </div>
+
+
+                <div class="welcome-form-grid">
+
+                    <div class="welcome-field">
+
+                        <label>
+                            Embed Colour
+                        </label>
+
+                        <div class="welcome-color-field">
+
+                            <input
+                                id="embedColorPicker"
+                                type="color"
+                                value="<%= settings.embedColor %>"
+                            >
+
+                            <input
+                                id="embedColor"
+                                type="text"
+                                value="<%= settings.embedColor %>"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="welcome-field">
+
+                        <label for="embedFooter">
+                            Footer
+                        </label>
+
+                        <input
+                            id="embedFooter"
+                            type="text"
+                            value="<%= settings.embedFooter %>"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <label class="welcome-toggle">
+
+                    <input
+                        id="showTimestamp"
+                        type="checkbox"
+                        <%= settings.showTimestamp ? "checked" : "" %>
+                    >
+
+                    <div>
+                        <strong>
+                            Show Timestamp
+                        </strong>
+
+                        <small>
+                            Add the Discord timestamp
+                            to the embed.
+                        </small>
+                    </div>
+
+                </label>
+
+            </section>
+
+
+            <!-- IMAGE -->
+
+            <section class="welcome-config-card">
+
+                <p class="eyebrow">
+                    WELCOME IMAGE
+                </p>
+
+                <h2>
+                    Image Configuration
+                </h2>
+
+
+                <label class="welcome-toggle">
+
+                    <input
+                        id="showImage"
+                        type="checkbox"
+                        <%= settings.showImage ? "checked" : "" %>
+                    >
+
+                    <div>
+                        <strong>
+                            Show Welcome Image
+                        </strong>
+
+                        <small>
+                            Generate the custom HCP welcome image.
+                        </small>
+                    </div>
+
+                </label>
+
+
+                <h3 class="welcome-subheading">
+                    Profile Picture
+                </h3>
+
+
+                <div class="welcome-form-grid three">
+
+                    <div class="welcome-field">
+
+                        <label>
+                            X Position
+                        </label>
+
+                        <input
+                            id="avatarX"
+                            type="number"
+                            value="<%= settings.avatarX %>"
+                        >
+
+                    </div>
+
+
+                    <div class="welcome-field">
+
+                        <label>
+                            Y Position
+                        </label>
+
+                        <input
+                            id="avatarY"
+                            type="number"
+                            value="<%= settings.avatarY %>"
+                        >
+
+                    </div>
+
+
+                    <div class="welcome-field">
+
+                        <label>
+                            Size
+                        </label>
+
+                        <input
+                            id="avatarSize"
+                            type="number"
+                            min="50"
+                            max="500"
+                            value="<%= settings.avatarSize %>"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <h3 class="welcome-subheading">
+                    Username
+                </h3>
+
+
+                <div class="welcome-form-grid three">
+
+                    <div class="welcome-field">
+
+                        <label>
+                            X Position
+                        </label>
+
+                        <input
+                            id="usernameX"
+                            type="number"
+                            value="<%= settings.usernameX %>"
+                        >
+
+                    </div>
+
+
+                    <div class="welcome-field">
+
+                        <label>
+                            Y Position
+                        </label>
+
+                        <input
+                            id="usernameY"
+                            type="number"
+                            value="<%= settings.usernameY %>"
+                        >
+
+                    </div>
+
+
+                    <div class="welcome-field">
+
+                        <label>
+                            Font Size
+                        </label>
+
+                        <input
+                            id="usernameFontSize"
+                            type="number"
+                            min="15"
+                            max="90"
+                            value="<%= settings.usernameFontSize %>"
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <button
+                id="saveWelcomeSettings"
+                type="button"
+                class="welcome-save-button"
+            >
+                Save Welcome Settings
+            </button>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- PREVIEW -->
+        <!-- =============================================== -->
+
+        <aside class="welcome-preview-column">
+
+            <div class="welcome-preview-sticky">
+
+                <p class="eyebrow">
+                    LIVE PREVIEW
+                </p>
+
+                <h2>
+                    Discord Preview
+                </h2>
+
+
+                <div class="welcome-discord-preview">
+
+                    <div class="welcome-discord-author">
+
+                        <img
+                            src="/public/images/hcp-main.png"
+                            alt="HCP"
+                        >
+
+                        <div>
+
+                            <strong>
+                                Hendry County Project
+                            </strong>
+
+                            <span class="welcome-app">
+                                APP
+                            </span>
+
+                            <small>
+                                Today at 12:00
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="welcomePreviewEmbed"
+                        class="welcome-preview-embed"
+                        data-color="<%= settings.embedColor %>"
+                    >
+
+                        <h3 id="previewWelcomeTitle">
+                            Welcome ExampleUser
+                        </h3>
+
+
+                        <p id="previewWelcomeDescription">
+                            Welcome <strong>@ExampleUser</strong>!
+                            You are our <strong>14th Member</strong>.
+                            Please look around and talk to some of our members.
+                        </p>
+
+
+                        <div
+                            id="welcomeImagePreview"
+                            class="welcome-image-preview"
+                        >
+
+                            <img
+                                src="/public/images/welcome-preview.png"
+                                alt=""
+                                onerror="this.style.display='none'"
+                            >
+
+                            <div
+                                id="previewAvatar"
+                                class="preview-avatar"
+                            >
+                                USER
+                            </div>
+
+                            <div
+                                id="previewUsername"
+                                class="preview-username"
+                            >
+                                ExampleUser
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="previewWelcomeFooter"
+                            class="welcome-preview-footer"
+                        >
+                            Hendry County Project
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/welcome.js"></script>
+
+</body>
+</html>

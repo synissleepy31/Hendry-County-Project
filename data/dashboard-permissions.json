@@ -1,0 +1,13 @@
+{
+    "ownerUserIds": [],
+    "allowedUserIds": [],
+    "allowedRoleIds": [],
+    "sections": {
+        "bot": [],
+        "moderation": [
+            "1540655905337516212"
+        ],
+        "management": [],
+        "configuration": []
+    }
+}

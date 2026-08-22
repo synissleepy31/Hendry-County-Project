@@ -1,0 +1,21 @@
+{
+    "channelId": "",
+    "roleId": "",
+    "title": "🚓 Patrol Announcement 🚓",
+    "description": "A patrol has been scheduled for **{time} {ampm} CST**.",
+    "color": "#ff8534",
+    "footer": "Hendry County Project • Patrol Management",
+    "timezone": "CST",
+    "cadMessage": "Make sure you're **in the CAD** and ready before patrol begins.",
+    "patrolAreas": [
+        "Sandy Shores & Route 68",
+        "Mirror Park",
+        "Paleto Bay"
+    ],
+    "attendanceYes": "Yes",
+    "attendanceMaybe": "Maybe / Late",
+    "attendanceNo": "No",
+    "pingRole": true,
+    "showTimestamp": true,
+    "addReactions": true
+}

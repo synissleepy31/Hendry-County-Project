@@ -1,0 +1,26 @@
+[
+    {
+        "id": "1787409151719-ubq2sf",
+        "timestamp": "2026-08-22T14:32:31.719Z",
+        "action": "REMOVE",
+        "guildId": "1533869053729571027",
+        "userId": "967375704486449222",
+        "username": "synissleepy",
+        "roleId": "1540663909495873566",
+        "roleName": "Patrol Announcements",
+        "moderatorId": "967375704486449222",
+        "moderatorName": "synissleepy"
+    },
+    {
+        "id": "1787409142967-6rvjk6",
+        "timestamp": "2026-08-22T14:32:22.968Z",
+        "action": "ADD",
+        "guildId": "1533869053729571027",
+        "userId": "967375704486449222",
+        "username": "synissleepy",
+        "roleId": "1540663909495873566",
+        "roleName": "Patrol Announcements",
+        "moderatorId": "967375704486449222",
+        "moderatorName": "synissleepy"
+    }
+]

@@ -1,0 +1,265 @@
+<%- include("partials/head", { title: "Bot Status" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container bot-status-page">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            BOT
+        </p>
+
+        <h1>
+            Bot
+            <span>Status</span>
+        </h1>
+
+        <p class="page-description">
+            View the current bot status and manage
+            the Discord presence shown to members.
+        </p>
+
+    </section>
+
+
+    <div
+        id="statusMessage"
+        class="status-message"
+    ></div>
+
+
+    <section class="bot-status-grid">
+
+        <article class="status-card bot-overview">
+
+            <div class="bot-profile">
+
+                <img
+                    src="<%= statusData.avatar %>"
+                    alt="Bot Avatar"
+                    class="bot-avatar"
+                >
+
+                <div>
+
+                    <p class="eyebrow">
+                        CURRENT STATUS
+                    </p>
+
+                    <h2>
+                        <%= statusData.username %>
+                    </h2>
+
+                    <div class="status-indicator">
+
+                        <span
+                            class="status-dot <%= statusData.online ? 'online' : 'offline' %>"
+                        ></span>
+
+                        <span>
+                            <%= statusData.online ? "Online" : "Offline" %>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="status-stats">
+
+                <div class="status-stat">
+                    <span>Ping</span>
+                    <strong><%= statusData.ping %>ms</strong>
+                </div>
+
+                <div class="status-stat">
+                    <span>Servers</span>
+                    <strong><%= statusData.servers %></strong>
+                </div>
+
+                <div class="status-stat">
+                    <span>Members</span>
+                    <strong><%= statusData.members %></strong>
+                </div>
+
+                <div class="status-stat">
+                    <span>Commands</span>
+                    <strong><%= statusData.commands %></strong>
+                </div>
+
+                <div class="status-stat">
+                    <span>Uptime</span>
+                    <strong id="uptimeValue">
+                        Loading...
+                    </strong>
+                </div>
+
+            </div>
+
+        </article>
+
+
+        <article class="status-card">
+
+            <p class="eyebrow">
+                PRESENCE SETTINGS
+            </p>
+
+            <h2>
+                Discord Presence
+            </h2>
+
+
+            <div class="status-form-grid">
+
+                <div class="status-field">
+
+                    <label for="botStatus">
+                        Status
+                    </label>
+
+                    <select id="botStatus">
+
+                        <option
+                            value="online"
+                            <%= botSettings.status === "online" ? "selected" : "" %>
+                        >
+                            Online
+                        </option>
+
+                        <option
+                            value="idle"
+                            <%= botSettings.status === "idle" ? "selected" : "" %>
+                        >
+                            Idle
+                        </option>
+
+                        <option
+                            value="dnd"
+                            <%= botSettings.status === "dnd" ? "selected" : "" %>
+                        >
+                            Do Not Disturb
+                        </option>
+
+                        <option
+                            value="invisible"
+                            <%= botSettings.status === "invisible" ? "selected" : "" %>
+                        >
+                            Invisible
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="status-field">
+
+                    <label for="activityType">
+                        Activity Type
+                    </label>
+
+                    <select id="activityType">
+
+                        <% [
+                            "Playing",
+                            "Watching",
+                            "Listening",
+                            "Competing"
+                        ].forEach(type => { %>
+
+                            <option
+                                value="<%= type %>"
+                                <%= botSettings.activityType === type ? "selected" : "" %>
+                            >
+                                <%= type %>
+                            </option>
+
+                        <% }) %>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="status-field">
+
+                <label for="activityText">
+                    Activity Text
+                </label>
+
+                <input
+                    id="activityText"
+                    type="text"
+                    maxlength="128"
+                    value="<%= botSettings.activityText %>"
+                    placeholder="Hendry County Project"
+                >
+
+            </div>
+
+
+            <div class="presence-preview">
+
+                <p class="eyebrow">
+                    LIVE PREVIEW
+                </p>
+
+                <div class="presence-user">
+
+                    <img
+                        src="<%= statusData.avatar %>"
+                        alt=""
+                    >
+
+                    <div>
+
+                        <strong>
+                            <%= statusData.username %>
+                        </strong>
+
+                        <span id="presencePreviewText">
+                            <%= botSettings.activityType %>
+                            <%= botSettings.activityText %>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="applyPresence"
+                type="button"
+                class="apply-presence-button"
+            >
+                Apply Presence
+            </button>
+
+        </article>
+
+    </section>
+
+</main>
+
+
+<div
+    id="botUptimeData"
+    data-uptime="<%= statusData.uptime %>"
+    hidden
+></div>
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/status.js"></script>
+
+</body>
+</html>

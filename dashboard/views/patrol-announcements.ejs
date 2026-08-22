@@ -1,0 +1,809 @@
+<%- include("partials/head", { title: "Patrol Announcements" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <!-- ====================================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ====================================================== -->
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            MODERATION
+        </p>
+
+        <h1>
+            Patrol
+            <span>Announcements</span>
+        </h1>
+
+        <p class="page-description">
+            Configure how patrol announcements are sent
+            by the Hendry County Project Discord bot.
+        </p>
+
+    </section>
+
+
+    <!-- SAVE MESSAGE -->
+
+    <div
+        id="saveMessage"
+        class="patrol-save-message"
+    ></div>
+
+
+    <!-- ====================================================== -->
+    <!-- MAIN EDITOR -->
+    <!-- ====================================================== -->
+
+    <div class="patrol-editor-layout">
+
+        <!-- ================================================== -->
+        <!-- LEFT SIDE -->
+        <!-- ================================================== -->
+
+        <div class="patrol-editor">
+
+
+            <!-- ================================================== -->
+            <!-- DISCORD DESTINATION -->
+            <!-- ================================================== -->
+
+            <section class="patrol-config-card">
+
+                <div class="patrol-card-heading">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            DESTINATION
+                        </p>
+
+                        <h2>
+                            Discord Destination
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="patrol-form-grid">
+
+                    <!-- CHANNEL -->
+
+                    <div class="patrol-field">
+
+                        <label for="channelId">
+                            Announcement Channel
+                        </label>
+
+                        <select id="channelId">
+
+                            <option value="">
+                                Select a channel...
+                            </option>
+
+                            <% channels.forEach(channel => { %>
+
+                                <option
+                                    value="<%= channel.id %>"
+                                    <%= settings.channelId === channel.id ? "selected" : "" %>
+                                >
+                                    # <%= channel.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ROLE -->
+
+                    <div class="patrol-field">
+
+                        <label for="roleId">
+                            Patrol Role
+                        </label>
+
+                        <select id="roleId">
+
+                            <option value="">
+                                Select a role...
+                            </option>
+
+                            <% roles.forEach(role => { %>
+
+                                <option
+                                    value="<%= role.id %>"
+                                    <%= settings.roleId === role.id ? "selected" : "" %>
+                                >
+                                    @<%= role.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================== -->
+            <!-- EMBED CUSTOMISATION -->
+            <!-- ================================================== -->
+
+            <section class="patrol-config-card">
+
+                <div class="patrol-card-heading">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            APPEARANCE
+                        </p>
+
+                        <h2>
+                            Embed Customisation
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TITLE -->
+
+                <div class="patrol-field">
+
+                    <label for="embedTitle">
+                        Embed Title
+                    </label>
+
+                    <input
+                        id="embedTitle"
+                        type="text"
+                        value="<%= settings.title || '🚓 Patrol Announcement 🚓' %>"
+                        placeholder="🚓 Patrol Announcement 🚓"
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="patrol-field">
+
+                    <label for="embedDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="embedDescription"
+                        rows="5"
+                        placeholder="Enter the patrol announcement description..."
+                    ><%= settings.description || '' %></textarea>
+
+                    <small>
+                        You can use {time} and {ampm}.
+                        These will automatically be replaced by the
+                        values entered in /patrolannouncements.
+                    </small>
+
+                </div>
+
+
+                <div class="patrol-form-grid">
+
+                    <!-- COLOUR -->
+
+                    <div class="patrol-field">
+
+                        <label for="embedColor">
+                            Embed Colour
+                        </label>
+
+                        <div class="color-field">
+
+                            <input
+                                id="embedColorPicker"
+                                type="color"
+                                value="<%= settings.color || '#ff8534' %>"
+                            >
+
+                            <input
+                                id="embedColor"
+                                type="text"
+                                value="<%= settings.color || '#ff8534' %>"
+                                placeholder="#ff8534"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TIMEZONE -->
+
+                    <div class="patrol-field">
+
+                        <label for="timezone">
+                            Timezone
+                        </label>
+
+                        <input
+                            id="timezone"
+                            type="text"
+                            value="<%= settings.timezone || 'CST' %>"
+                            placeholder="CST"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="patrol-field">
+
+                    <label for="footer">
+                        Embed Footer
+                    </label>
+
+                    <input
+                        id="footer"
+                        type="text"
+                        value="<%= settings.footer || 'Hendry County Project • Patrol Management' %>"
+                        placeholder="Hendry County Project • Patrol Management"
+                    >
+
+                </div>
+
+
+                <!-- CAD MESSAGE -->
+
+                <div class="patrol-field">
+
+                    <label for="cadMessage">
+                        CAD / Information Message
+                    </label>
+
+                    <textarea
+                        id="cadMessage"
+                        rows="3"
+                        placeholder="Make sure you're in the CAD!"
+                    ><%= settings.cadMessage || '' %></textarea>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================== -->
+            <!-- PATROL AREAS -->
+            <!-- ================================================== -->
+
+            <section class="patrol-config-card">
+
+                <div class="patrol-card-heading">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            LOCATIONS
+                        </p>
+
+                        <h2>
+                            Patrol Areas
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <p class="patrol-section-description">
+                    Configure the patrol areas that members can
+                    select by reacting to the announcement.
+                </p>
+
+
+                <div id="patrolAreas">
+
+                    <% if (settings.patrolAreas && settings.patrolAreas.length) { %>
+
+                        <% settings.patrolAreas.forEach((area, index) => { %>
+
+                            <div class="patrol-area-row">
+
+                                <span class="area-number">
+                                    <%= index + 1 %>
+                                </span>
+
+                                <input
+                                    type="text"
+                                    class="patrol-area-input"
+                                    value="<%= area %>"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="remove-area"
+                                >
+                                    Remove
+                                </button>
+
+                            </div>
+
+                        <% }) %>
+
+                    <% } %>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="addArea"
+                    class="patrol-secondary-button"
+                >
+                    + Add Patrol Area
+                </button>
+
+            </section>
+
+
+            <!-- ================================================== -->
+            <!-- ATTENDANCE -->
+            <!-- ================================================== -->
+
+            <section class="patrol-config-card">
+
+                <div class="patrol-card-heading">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            RESPONSES
+                        </p>
+
+                        <h2>
+                            Attendance Options
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <!-- YES -->
+
+                <div class="patrol-field">
+
+                    <label for="attendanceYes">
+                        ✅ Yes Response
+                    </label>
+
+                    <input
+                        id="attendanceYes"
+                        type="text"
+                        value="<%= settings.attendanceYes || 'Yes' %>"
+                    >
+
+                </div>
+
+
+                <!-- MAYBE -->
+
+                <div class="patrol-field">
+
+                    <label for="attendanceMaybe">
+                        ❓ Maybe / Late Response
+                    </label>
+
+                    <input
+                        id="attendanceMaybe"
+                        type="text"
+                        value="<%= settings.attendanceMaybe || 'Maybe / Late' %>"
+                    >
+
+                </div>
+
+
+                <!-- NO -->
+
+                <div class="patrol-field">
+
+                    <label for="attendanceNo">
+                        ❌ No Response
+                    </label>
+
+                    <input
+                        id="attendanceNo"
+                        type="text"
+                        value="<%= settings.attendanceNo || 'No' %>"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================== -->
+            <!-- OPTIONS -->
+            <!-- ================================================== -->
+
+            <section class="patrol-config-card">
+
+                <div class="patrol-card-heading">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            OPTIONS
+                        </p>
+
+                        <h2>
+                            Announcement Behaviour
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PING ROLE -->
+
+                <label class="patrol-toggle">
+
+                    <input
+                        id="pingRole"
+                        type="checkbox"
+                        <%= settings.pingRole ? "checked" : "" %>
+                    >
+
+                    <div>
+
+                        <strong>
+                            Ping Patrol Role
+                        </strong>
+
+                        <small>
+                            Mention the configured patrol role
+                            when the announcement is sent.
+                        </small>
+
+                    </div>
+
+                </label>
+
+
+                <!-- TIMESTAMP -->
+
+                <label class="patrol-toggle">
+
+                    <input
+                        id="showTimestamp"
+                        type="checkbox"
+                        <%= settings.showTimestamp ? "checked" : "" %>
+                    >
+
+                    <div>
+
+                        <strong>
+                            Show Timestamp
+                        </strong>
+
+                        <small>
+                            Add the current date and time to
+                            the Discord embed.
+                        </small>
+
+                    </div>
+
+                </label>
+
+
+                <!-- REACTIONS -->
+
+                <label class="patrol-toggle">
+
+                    <input
+                        id="addReactions"
+                        type="checkbox"
+                        <%= settings.addReactions ? "checked" : "" %>
+                    >
+
+                    <div>
+
+                        <strong>
+                            Automatically Add Reactions
+                        </strong>
+
+                        <small>
+                            Add attendance and patrol-area
+                            reactions automatically.
+                        </small>
+
+                    </div>
+
+                </label>
+
+            </section>
+
+
+            <!-- ================================================== -->
+            <!-- SAVE -->
+            <!-- ================================================== -->
+
+            <button
+                id="savePatrolSettings"
+                type="button"
+                class="patrol-save-button"
+            >
+                Save Patrol Settings
+            </button>
+
+        </div>
+
+
+        <!-- ================================================== -->
+        <!-- RIGHT SIDE / DISCORD PREVIEW -->
+        <!-- ================================================== -->
+
+        <aside class="patrol-preview-column">
+
+            <div class="patrol-preview-sticky">
+
+                <p class="eyebrow">
+                    LIVE PREVIEW
+                </p>
+
+                <h2>
+                    Discord Preview
+                </h2>
+
+                <p class="patrol-preview-description">
+                    This preview updates as you customise
+                    your patrol announcement.
+                </p>
+
+
+                <div class="discord-preview">
+
+
+                    <!-- BOT -->
+
+                    <div class="discord-author">
+
+                        <img
+                            src="/public/images/hcp-main.png"
+                            alt="Hendry County Project"
+                        >
+
+                        <div>
+
+                            <strong>
+                                Hendry County Project
+                            </strong>
+
+                            <span class="discord-app">
+                                APP
+                            </span>
+
+                            <span class="discord-time">
+                                Today at 7:00 PM
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ROLE PING -->
+
+                    <div
+                        id="previewPing"
+                        class="preview-role-ping"
+                    >
+                        @Patrol
+                    </div>
+
+
+                    <!-- EMBED -->
+
+<div
+    id="previewEmbed"
+    class="discord-embed"
+    data-embed-color="<%= settings.color || '#ff8534' %>"
+>
+
+                        <!-- TITLE -->
+
+                        <h3 id="previewTitle">
+                            <%= settings.title || "🚓 Patrol Announcement 🚓" %>
+                        </h3>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <div
+                            id="previewDescription"
+                            class="preview-description"
+                        >
+                            A patrol has been scheduled for
+                            <strong>7:00 PM CST</strong>.
+                        </div>
+
+
+                        <!-- AREAS -->
+
+                        <div class="preview-section">
+
+                            <strong>
+                                📍 Patrol Areas
+                            </strong>
+
+                            <div id="previewAreas">
+
+                                <% if (settings.patrolAreas) { %>
+
+                                    <% settings.patrolAreas.forEach((area, index) => { %>
+
+                                        <p>
+                                            <%= ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"][index] || "•" %>
+                                            <%= area %>
+                                        </p>
+
+                                    <% }) %>
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TIME -->
+
+                        <div class="preview-section">
+
+                            <strong>
+                                🚔 Patrol Information
+                            </strong>
+
+                            <p>
+                                🕐
+                                <strong>Time:</strong>
+                                7:00 PM
+                                <span id="previewTimezone">
+                                    <%= settings.timezone || "CST" %>
+                                </span>
+                            </p>
+
+                        </div>
+
+
+                        <!-- CAD -->
+
+                        <p
+                            id="previewCad"
+                            class="preview-cad"
+                        >
+                            <%= settings.cadMessage || "Make sure you're in the CAD!" %>
+                        </p>
+
+
+                        <!-- ATTENDANCE -->
+
+                        <div class="preview-section">
+
+                            <strong>
+                                📋 Attendance
+                            </strong>
+
+                            <p>
+                                ✅
+                                <span id="previewYes">
+                                    <%= settings.attendanceYes || "Yes" %>
+                                </span>
+                            </p>
+
+                            <p>
+                                ❓
+                                <span id="previewMaybe">
+                                    <%= settings.attendanceMaybe || "Maybe / Late" %>
+                                </span>
+                            </p>
+
+                            <p>
+                                ❌
+                                <span id="previewNo">
+                                    <%= settings.attendanceNo || "No" %>
+                                </span>
+                            </p>
+
+                        </div>
+
+
+                        <!-- FOOTER -->
+
+                        <div
+                            id="previewFooter"
+                            class="discord-footer"
+                        >
+                            <%= settings.footer || "Hendry County Project • Patrol Management" %>
+                        </div>
+
+                    </div>
+
+
+                    <!-- REACTIONS -->
+
+                    <div
+                        id="previewReactions"
+                        class="discord-reactions"
+                    >
+
+                        <span>
+                            ✅ 1
+                        </span>
+
+                        <span>
+                            ❓ 1
+                        </span>
+
+                        <span>
+                            ❌ 1
+                        </span>
+
+                        <% if (settings.patrolAreas) { %>
+
+                            <% settings.patrolAreas.forEach((area, index) => { %>
+
+                                <% if (index < 9) { %>
+
+                                    <span>
+                                        <%= ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"][index] %>
+                                        1
+                                    </span>
+
+                                <% } %>
+
+                            <% }) %>
+
+                        <% } %>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+<!-- ====================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ====================================================== -->
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/patrol-announcements.js"></script>
+
+</body>
+</html>

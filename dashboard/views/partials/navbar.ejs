@@ -1,0 +1,568 @@
+<header class="main-navbar">
+
+    <a href="/dashboard" class="brand">
+
+        <div class="brand-logo">
+            <img
+                src="/public/images/hcp-main.png"
+                alt="Hendry County Project"
+            >
+        </div>
+
+        <div class="brand-text">
+            <strong>Hendry County</strong>
+            <span>Project</span>
+        </div>
+
+    </a>
+
+
+    <%
+        const access =
+            typeof dashboardAccess !== "undefined"
+                ? dashboardAccess
+                : {
+                    allowed: false,
+                    isOwner: false,
+                    sections: {
+                        bot: false,
+                        moderation: false,
+                        management: false,
+                        configuration: false,
+                        owner: false
+                    }
+                };
+
+
+        const hasAnyStaffSection =
+            access.isOwner ||
+            access.sections.bot ||
+            access.sections.moderation ||
+            access.sections.management ||
+            access.sections.configuration;
+    %>
+
+
+    <nav class="navigation">
+
+
+        <!-- ================================================== -->
+        <!-- HOME -->
+        <!-- Only visible if they have at least one staff area -->
+        <!-- ================================================== -->
+
+        <% if (hasAnyStaffSection) { %>
+
+            <a
+                href="/dashboard"
+                class="nav-link <%= activePage === 'home' ? 'active' : '' %>"
+            >
+                Home
+            </a>
+
+        <% } %>
+
+
+
+        <!-- ================================================== -->
+        <!-- BOT -->
+        <!-- ================================================== -->
+
+        <% if (
+            access.isOwner ||
+            access.sections.bot
+        ) { %>
+
+            <div class="dropdown">
+
+                <button
+                    type="button"
+                    class="nav-link dropdown-toggle <%= activePage === 'bot' ? 'active' : '' %>"
+                >
+                    Bot
+                    <span>⌄</span>
+                </button>
+
+
+                <div class="dropdown-menu">
+
+                    <a href="/dashboard/status">
+
+                        <div class="dropdown-icon">
+                            ◉
+                        </div>
+
+                        <div>
+                            <strong>
+                                Bot Status
+                            </strong>
+
+                            <small>
+                                View bot information
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/commands">
+
+                        <div class="dropdown-icon">
+                            ⚡
+                        </div>
+
+                        <div>
+                            <strong>
+                                Commands
+                            </strong>
+
+                            <small>
+                                Configure bot commands
+                            </small>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+
+        <!-- ================================================== -->
+        <!-- MODERATION -->
+        <!-- ================================================== -->
+
+        <% if (
+            access.isOwner ||
+            access.sections.moderation
+        ) { %>
+
+            <div class="dropdown">
+
+                <button
+                    type="button"
+                    class="nav-link dropdown-toggle <%= activePage === 'moderation' ? 'active' : '' %>"
+                >
+                    Moderation
+                    <span>⌄</span>
+                </button>
+
+
+                <div class="dropdown-menu">
+
+                    <a href="/dashboard/moderation">
+
+                        <div class="dropdown-icon">
+                            ◆
+                        </div>
+
+                        <div>
+                            <strong>
+                                Moderation
+                            </strong>
+
+                            <small>
+                                Staff moderation tools
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/patrol-announcements">
+
+                        <div class="dropdown-icon">
+                            🚓
+                        </div>
+
+                        <div>
+                            <strong>
+                                Patrol Announcements
+                            </strong>
+
+                            <small>
+                                Configure patrol announcements
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/cases">
+
+                        <div class="dropdown-icon">
+                            ▣
+                        </div>
+
+                        <div>
+                            <strong>
+                                Cases
+                            </strong>
+
+                            <small>
+                                Moderation history
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/logs">
+
+                        <div class="dropdown-icon">
+                            ≡
+                        </div>
+
+                        <div>
+                            <strong>
+                                Logs
+                            </strong>
+
+                            <small>
+                                Staff activity logs
+                            </small>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+
+        <!-- ================================================== -->
+        <!-- MANAGEMENT -->
+        <!-- ================================================== -->
+
+        <% if (
+            access.isOwner ||
+            access.sections.management
+        ) { %>
+
+            <div class="dropdown">
+
+                <button
+                    type="button"
+                    class="nav-link dropdown-toggle <%= activePage === 'management' ? 'active' : '' %>"
+                >
+                    Management
+                    <span>⌄</span>
+                </button>
+
+
+                <div class="dropdown-menu">
+
+                    <a href="/dashboard/announcements">
+
+                        <div class="dropdown-icon">
+                            ◀
+                        </div>
+
+                        <div>
+                            <strong>
+                                Announcements
+                            </strong>
+
+                            <small>
+                                Send Discord messages
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/roles">
+
+                        <div class="dropdown-icon">
+                            ★
+                        </div>
+
+                        <div>
+                            <strong>
+                                Roles
+                            </strong>
+
+                            <small>
+                                Manage server roles
+                            </small>
+                        </div>
+
+                    </a>
+
+
+
+                    <!-- OWNER IS ONLY VISIBLE TO OWNER -->
+
+                    <% if (access.isOwner) { %>
+
+                        <a href="/dashboard/owner">
+
+                            <div class="dropdown-icon orange">
+                                ♛
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Owner
+                                </strong>
+
+                                <small>
+                                    Owner controls
+                                </small>
+                            </div>
+
+                        </a>
+
+                    <% } %>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+
+        <!-- ================================================== -->
+        <!-- CONFIGURATION -->
+        <!-- ================================================== -->
+
+        <% if (
+            access.isOwner ||
+            access.sections.configuration
+        ) { %>
+
+            <div class="dropdown">
+
+                <button
+                    type="button"
+                    class="nav-link dropdown-toggle <%= activePage === 'configuration' ? 'active' : '' %>"
+                >
+                    Configuration
+                    <span>⌄</span>
+                </button>
+
+
+                <div class="dropdown-menu">
+
+                    <a href="/dashboard/welcome">
+
+                        <div class="dropdown-icon">
+                            ✦
+                        </div>
+
+                        <div>
+                            <strong>
+                                Welcome Editor
+                            </strong>
+
+                            <small>
+                                Configure welcomes
+                            </small>
+                        </div>
+
+                    </a>
+
+
+                    <a href="/dashboard/settings">
+
+                        <div class="dropdown-icon">
+                            ⚙
+                        </div>
+
+                        <div>
+                            <strong>
+                                Settings
+                            </strong>
+
+                            <small>
+                                Bot configuration
+                            </small>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+
+        <!-- ================================================== -->
+        <!-- PUBLIC -->
+        <!-- ALWAYS VISIBLE -->
+        <!-- ================================================== -->
+
+        <div class="dropdown">
+
+            <button
+                type="button"
+                class="nav-link dropdown-toggle <%= activePage === 'public' ? 'active' : '' %>"
+            >
+                Public
+                <span>⌄</span>
+            </button>
+
+
+            <div class="dropdown-menu">
+
+                <a href="/news">
+
+                    <div class="dropdown-icon">
+                        📰
+                    </div>
+
+                    <div>
+                        <strong>
+                            News
+                        </strong>
+
+                        <small>
+                            Hendry County Project news
+                        </small>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================================================== -->
+    <!-- PROFILE -->
+    <!-- ================================================== -->
+
+    <div class="dropdown profile-dropdown">
+
+        <button
+            type="button"
+            class="profile-button dropdown-toggle"
+        >
+
+            <img
+                src="<%= user.avatar %>"
+                alt="Discord Avatar"
+            >
+
+
+            <div class="profile-text">
+
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Account Connected
+                </span>
+
+            </div>
+
+
+            <span class="profile-chevron">
+                ⌄
+            </span>
+
+        </button>
+
+
+        <div class="dropdown-menu profile-menu">
+
+            <div class="profile-preview">
+
+                <img
+                    src="<%= user.avatar %>"
+                    alt="Discord Avatar"
+                >
+
+
+                <div>
+
+                    <strong>
+                        <%= user.displayName %>
+                    </strong>
+
+                    <small>
+                        Discord Connected
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="dropdown-divider"></div>
+
+
+            <!--
+                Only show dashboard Settings here if
+                they actually have Configuration access.
+            -->
+
+            <% if (
+                access.isOwner ||
+                access.sections.configuration
+            ) { %>
+
+                <a href="/dashboard/settings">
+
+                    <div class="dropdown-icon">
+                        ⚙
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Settings
+                        </strong>
+
+                        <small>
+                            Dashboard settings
+                        </small>
+
+                    </div>
+
+                </a>
+
+            <% } %>
+
+
+            <a
+                href="/logout"
+                class="logout-link"
+            >
+
+                <div class="dropdown-icon red">
+                    ↪
+                </div>
+
+                <div>
+
+                    <strong>
+                        Logout
+                    </strong>
+
+                    <small>
+                        Disconnect account
+                    </small>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</header>

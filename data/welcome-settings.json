@@ -1,0 +1,17 @@
+{
+    "enabled": true,
+    "channelId": "1533869054425829561",
+    "embedColor": "#ff8534",
+    "embedTitle": "Welcome {username}",
+    "embedDescription": "Welcome **{mention}**! You are our **{memberNumber} Member**. Please look around and talk to some of our members.",
+    "embedFooter": "Hendry County Project",
+    "showTimestamp": true,
+    "showImage": true,
+    "avatarX": 107,
+    "avatarY": 99,
+    "avatarSize": 245,
+    "usernameX": 450,
+    "usernameY": 225,
+    "usernameFontSize": 42,
+    "pingUser": true
+}

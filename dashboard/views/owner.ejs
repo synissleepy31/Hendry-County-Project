@@ -1,0 +1,441 @@
+<%- include("partials/head", { title: "Owner Control Center" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container">
+
+    <section class="page-hero">
+
+        <p class="eyebrow">
+            OWNER
+        </p>
+
+        <h1>
+            Owner
+            <span>Control Center</span>
+        </h1>
+
+        <p class="page-description">
+            Control who can access the Hendry County Project
+            dashboard and which areas each role can see.
+        </p>
+
+    </section>
+
+
+    <div
+        id="ownerMessage"
+        class="owner-message"
+    ></div>
+
+
+    <div class="owner-layout">
+
+        <!-- ============================================ -->
+        <!-- DASHBOARD ACCESS -->
+        <!-- ============================================ -->
+
+        <section class="owner-card">
+
+            <p class="eyebrow">
+                DASHBOARD ACCESS
+            </p>
+
+            <h2>
+                Who can access the dashboard?
+            </h2>
+
+
+            <div class="owner-form-grid">
+
+                <div class="owner-field">
+
+                    <label>
+                        Add User
+                    </label>
+
+                    <select id="addUserSelect">
+
+                        <option value="">
+                            Select a user...
+                        </option>
+
+                        <% members.forEach(member => { %>
+
+                            <option value="<%= member.id %>">
+                                <%= member.displayName %>
+                                (@<%= member.username %>)
+                            </option>
+
+                        <% }) %>
+
+                    </select>
+
+                    <button
+                        id="addUserButton"
+                        type="button"
+                        class="owner-add-button"
+                    >
+                        + Add User
+                    </button>
+
+                </div>
+
+
+                <div class="owner-field">
+
+                    <label>
+                        Add Role
+                    </label>
+
+                    <select id="addRoleSelect">
+
+                        <option value="">
+                            Select a role...
+                        </option>
+
+                        <% roles.forEach(role => { %>
+
+                            <option value="<%= role.id %>">
+                                @<%= role.name %>
+                            </option>
+
+                        <% }) %>
+
+                    </select>
+
+                    <button
+                        id="addRoleButton"
+                        type="button"
+                        class="owner-add-button"
+                    >
+                        + Add Role
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="owner-access-section">
+
+                <h3>
+                    Allowed Users
+                </h3>
+
+                <div
+                    id="allowedUsers"
+                    class="owner-chip-list"
+                >
+
+                    <% permissions.allowedUserIds.forEach(userId => { %>
+
+                        <% const found = members.find(m => m.id === userId); %>
+
+                        <% if (found) { %>
+
+                            <div
+                                class="owner-chip"
+                                data-user-id="<%= found.id %>"
+                            >
+                                <span>
+                                    <%= found.displayName %>
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="remove-user"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                        <% } %>
+
+                    <% }) %>
+
+                </div>
+
+            </div>
+
+
+            <div class="owner-access-section">
+
+                <h3>
+                    Allowed Roles
+                </h3>
+
+                <div
+                    id="allowedRoles"
+                    class="owner-chip-list"
+                >
+
+                    <% permissions.allowedRoleIds.forEach(roleId => { %>
+
+                        <% const found = roles.find(r => r.id === roleId); %>
+
+                        <% if (found) { %>
+
+                            <div
+                                class="owner-chip"
+                                data-role-id="<%= found.id %>"
+                            >
+                                <span>
+                                    @<%= found.name %>
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="remove-role"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                        <% } %>
+
+                    <% }) %>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================================ -->
+        <!-- SECTION ACCESS -->
+        <!-- ============================================ -->
+
+        <section class="owner-card">
+
+            <p class="eyebrow">
+                SECTION ACCESS
+            </p>
+
+            <h2>
+                Role Permissions
+            </h2>
+
+            <p class="owner-description">
+                Select which Discord roles can access each dashboard area.
+            </p>
+
+
+            <% const sections = [
+                {
+                    key: "bot",
+                    name: "Bot",
+                    description: "Bot status and command management."
+                },
+                {
+                    key: "moderation",
+                    name: "Moderation",
+                    description: "Moderation tools, warnings, bans and patrols."
+                },
+                {
+                    key: "management",
+                    name: "Management",
+                    description: "Announcements, roles and management tools."
+                },
+                {
+                    key: "configuration",
+                    name: "Configuration",
+                    description: "Welcome editor and bot configuration."
+                }
+            ]; %>
+
+
+            <% sections.forEach(section => { %>
+
+                <div
+                    class="owner-section-row"
+                    data-section="<%= section.key %>"
+                >
+
+                    <div class="owner-section-info">
+
+                        <strong>
+                            <%= section.name %>
+                        </strong>
+
+                        <small>
+                            <%= section.description %>
+                        </small>
+
+                    </div>
+
+
+                    <div class="owner-section-control">
+
+                        <select
+                            class="section-role-select"
+                            data-section="<%= section.key %>"
+                        >
+
+                            <option value="">
+                                Add role...
+                            </option>
+
+                            <% roles.forEach(role => { %>
+
+                                <option value="<%= role.id %>">
+                                    @<%= role.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+
+                        <button
+                            type="button"
+                            class="section-add-role"
+                            data-section="<%= section.key %>"
+                        >
+                            + Add
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="owner-chip-list section-role-list"
+                        data-section="<%= section.key %>"
+                    >
+
+                        <% permissions.sections[section.key].forEach(roleId => { %>
+
+                            <% const found = roles.find(r => r.id === roleId); %>
+
+                            <% if (found) { %>
+
+                                <div
+                                    class="owner-chip"
+                                    data-role-id="<%= found.id %>"
+                                >
+
+                                    <span>
+                                        @<%= found.name %>
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        class="remove-section-role"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                            <% } %>
+
+                        <% }) %>
+
+                    </div>
+
+                </div>
+
+            <% }) %>
+
+
+            <div class="owner-section-row owner-only">
+
+                <div class="owner-section-info">
+
+                    <strong>
+                        Owner
+                    </strong>
+
+                    <small>
+                        Owner controls and dashboard permissions.
+                    </small>
+
+                </div>
+
+                <span class="owner-only-badge">
+                    OWNER ONLY
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <button
+            id="saveOwnerPermissions"
+            type="button"
+            class="owner-save-button"
+        >
+            Save Permissions
+        </button>
+
+    </div>
+<!-- ====================================================== -->
+<!-- NEWS MANAGEMENT -->
+<!-- ====================================================== -->
+
+<section class="owner-card owner-news-control-card">
+
+    <div class="owner-section-header">
+
+        <div>
+
+            <p class="eyebrow">
+                PUBLIC CONTENT
+            </p>
+
+            <h2>
+                News Management
+            </h2>
+
+            <p class="muted">
+                Create, edit, publish and manage news articles
+                shown on the public HCP News page.
+            </p>
+
+        </div>
+
+        <div class="owner-news-icon">
+            📰
+        </div>
+
+    </div>
+
+
+    <div class="owner-news-control-footer">
+
+        <div>
+
+            <strong>
+                HCP News
+            </strong>
+
+            <span>
+                Manage the public news archive.
+            </span>
+
+        </div>
+
+
+        <a
+            href="/dashboard/owner/news"
+            class="owner-news-manage-button"
+        >
+            Manage News →
+        </a>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/owner.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+<%- include("partials/head", { title: "Role Management" }) %>
+
+<body>
+
+<%- include("partials/navbar") %>
+
+<main class="page-container role-page">
+
+    <section class="page-hero role-hero">
+
+        <p class="eyebrow">
+            MANAGEMENT
+        </p>
+
+        <h1>
+            Role
+            <span>Management</span>
+        </h1>
+
+        <p class="page-description">
+            Assign approved Discord roles to members and control
+            which roles can be managed through the dashboard.
+        </p>
+
+    </section>
+
+
+    <div
+        id="roleMessage"
+        class="role-message"
+    ></div>
+
+
+    <section class="role-grid">
+
+        <article class="role-card">
+
+            <p class="eyebrow">
+                MEMBER ROLE MANAGER
+            </p>
+
+            <h2>
+                Manage a Member
+            </h2>
+
+
+            <label>
+                Member
+            </label>
+
+            <select id="memberSelect">
+
+                <option value="">
+                    Select a member...
+                </option>
+
+                <% members.forEach(member => { %>
+
+                    <option value="<%= member.id %>">
+                        <%= member.displayName %>
+                        (@<%= member.username %>)
+                    </option>
+
+                <% }) %>
+
+            </select>
+
+
+            <div
+                id="selectedMember"
+                class="member-preview"
+            >
+
+                <strong>
+                    Select a member
+                </strong>
+
+                <span>
+                    Their current roles will appear here.
+                </span>
+
+            </div>
+
+
+            <h3>
+                Current Roles
+            </h3>
+
+            <div
+                id="currentRoles"
+                class="role-chip-list"
+            >
+
+                <span class="muted">
+                    No member selected.
+                </span>
+
+            </div>
+
+
+            <h3>
+                Add Role
+            </h3>
+
+            <div class="role-action-row">
+
+                <select id="roleSelect">
+
+                    <option value="">
+                        Select a manageable role...
+                    </option>
+
+                    <% roles
+                        .filter(role => role.manageable && !role.protected)
+                        .forEach(role => { %>
+
+                        <option value="<%= role.id %>">
+                            @<%= role.name %>
+                        </option>
+
+                    <% }) %>
+
+                </select>
+
+
+                <button
+                    id="addRoleButton"
+                    type="button"
+                >
+                    + Add Role
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <article class="role-card">
+
+            <p class="eyebrow">
+                ROLE DIRECTORY
+            </p>
+
+            <h2>
+                Server Roles
+            </h2>
+
+
+            <input
+                id="roleSearch"
+                type="search"
+                placeholder="Search roles..."
+            >
+
+
+            <div class="role-directory">
+
+                <% roles.forEach(role => { %>
+
+                    <div
+                        class="role-directory-item"
+                        data-role-name="<%= role.name.toLowerCase() %>"
+                    >
+
+                        <div>
+
+                            <span
+                                class="role-dot"
+                                data-color="<%= role.color %>"
+                            ></span>
+
+                            <strong>
+                                @<%= role.name %>
+                            </strong>
+
+                        </div>
+
+
+                        <small>
+
+                            <%= role.memberCount %>
+                            member<%= role.memberCount === 1 ? "" : "s" %>
+
+                            <% if (role.protected) { %>
+                                • Protected
+                            <% } else if (role.manageable) { %>
+                                • Manageable
+                            <% } %>
+
+                        </small>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <section class="role-card manageable-card">
+
+        <p class="eyebrow">
+            MANAGEABLE ROLES
+        </p>
+
+        <h2>
+            Dashboard Role Permissions
+        </h2>
+
+        <p class="muted">
+            Choose which roles can be added or removed through the dashboard.
+            Administrator and bot-managed roles are always protected.
+        </p>
+
+
+        <div class="manageable-role-grid">
+
+            <% roles.forEach(role => { %>
+
+                <label class="manageable-role-item">
+
+                    <div>
+
+                        <span
+                            class="role-dot"
+                            data-color="<%= role.color %>"
+                        ></span>
+
+                        <strong>
+                            @<%= role.name %>
+                        </strong>
+
+                    </div>
+
+
+                    <% if (role.protected) { %>
+
+                        <span class="protected-text">
+                            Protected
+                        </span>
+
+                    <% } else { %>
+
+                        <input
+                            type="checkbox"
+                            class="manageable-checkbox"
+                            value="<%= role.id %>"
+                            <%= role.manageable ? "checked" : "" %>
+                            <%= !isOwner ? "disabled" : "" %>
+                        >
+
+                    <% } %>
+
+                </label>
+
+            <% }) %>
+
+        </div>
+
+
+        <% if (isOwner) { %>
+
+            <button
+                id="saveManageableRoles"
+                type="button"
+                class="save-role-settings"
+            >
+                Save Role Settings
+            </button>
+
+        <% } %>
+
+    </section>
+
+
+    <section class="role-card">
+
+        <p class="eyebrow">
+            AUDIT LOG
+        </p>
+
+        <h2>
+            Recent Role Changes
+        </h2>
+
+
+        <div class="audit-list">
+
+            <% if (!auditLog.length) { %>
+
+                <p class="muted">
+                    No dashboard role changes recorded yet.
+                </p>
+
+            <% } %>
+
+
+            <% auditLog.forEach(entry => { %>
+
+                <div class="audit-item">
+
+                    <strong>
+                        <%= entry.moderatorName %>
+                        <%= entry.action === "ADD" ? "added" : "removed" %>
+                        @<%= entry.roleName %>
+                    </strong>
+
+                    <span>
+                        <%= entry.username %>
+                    </span>
+
+                </div>
+
+            <% }) %>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="/public/js/dashboard.js"></script>
+<script src="/public/js/roles.js"></script>
+
+<script>
+    document
+        .querySelectorAll(".role-dot[data-color]")
+        .forEach(dot => {
+            dot.style.backgroundColor =
+                dot.dataset.color;
+        });
+</script>
+
+</body>
+</html>
