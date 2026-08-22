@@ -500,9 +500,9 @@ export default {
                     const modal =
                         new ModalBuilder()
 
-                            .setCustomId(
-                                `rolerequest_deny_modal:${requestId}:${targetUserId}:${requestedRoleId}:${departmentKey}:${interaction.channelId}:${interaction.message.id}`
-                            )
+.setCustomId(
+    `rrdeny:${targetUserId}:${requestedRoleId}:${departmentKey}`
+)
 
                             .setTitle(
                                 "Deny Role Request"
@@ -593,27 +593,25 @@ export default {
         // MODAL SUBMIT
         // ======================================================
 
-        if (
-            interaction.isModalSubmit() &&
-            interaction.customId.startsWith(
-                "rolerequest_deny_modal:"
-            )
-        ) {
+if (
+    interaction.isModalSubmit() &&
+    interaction.customId.startsWith(
+        "rrdeny:"
+    )
+)
+        {
 
             try {
 
-                const [
-                    ,
-                    requestId,
-                    targetUserId,
-                    requestedRoleId,
-                    departmentKey,
-                    requestChannelId,
-                    requestMessageId
-                ] =
-                    interaction.customId.split(
-                        ":"
-                    );
+const [
+    ,
+    targetUserId,
+    requestedRoleId,
+    departmentKey
+] =
+    interaction.customId.split(
+        ":"
+    );
 
 
                 const department =

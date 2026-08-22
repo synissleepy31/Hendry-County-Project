@@ -81,14 +81,15 @@ export async function loadCommands(client) {
             `[COMMANDS] Registering ${commandsJSON.length} command(s)...`
         );
 
-        await rest.put(
-            Routes.applicationCommands(
-                process.env.CLIENT_ID
-            ),
-            {
-                body: commandsJSON
-            }
-        );
+await rest.put(
+    Routes.applicationGuildCommands(
+        process.env.CLIENT_ID,
+        process.env.GUILD_ID
+    ),
+    {
+        body: commandsJSON
+    }
+);
 
         console.log(
             `✅ Registered ${commandsJSON.length} slash command(s).`
