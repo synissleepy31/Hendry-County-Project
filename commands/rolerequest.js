@@ -61,21 +61,62 @@ export const data =
         )
 
 
+export const data =
+    new SlashCommandBuilder()
+
+        .setName("rolerequest")
+
+        .setDescription(
+            "Request a Discord role from your department."
+        )
+
         .addRoleOption(option =>
-
             option
-                .setName(
-                    "role"
-                )
-
+                .setName("role")
                 .setDescription(
-                    "The role you are requesting."
+                    "Select the role you are requesting."
                 )
+                .setRequired(true)
+        )
 
-                .setRequired(
-                    true
+        .addStringOption(option =>
+            option
+                .setName("department")
+                .setDescription(
+                    "The department this request is for."
+                )
+                .setRequired(true)
+                .addChoices(
+                    {
+                        name:
+                            "Clewiston Police Department (CPD)",
+                        value:
+                            "CPD"
+                    },
+                    {
+                        name:
+                            "Hendry County Sheriff's Office (HCSO)",
+                        value:
+                            "HCSO"
+                    },
+                    {
+                        name:
+                            "Florida Highway Patrol (FHP)",
+                        value:
+                            "FHP"
+                    }
                 )
         )
+
+        .addStringOption(option =>
+            option
+                .setName("reason")
+                .setDescription(
+                    "Why are you requesting this role?"
+                )
+                .setRequired(true)
+                .setMaxLength(1000)
+        );
 
 
         .addStringOption(option =>
