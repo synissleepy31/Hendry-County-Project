@@ -173,6 +173,9 @@ router.get(
                             d.accent_color
                                 AS department_color,
 
+                            d.logo_url
+                                AS department_logo,
+
                             (
                                 SELECT COUNT(*)
 
@@ -204,6 +207,8 @@ router.get(
                         INNER JOIN training_departments d
                             ON d.id =
                             a.department_id
+
+                        WHERE a.is_active = 1
 
                         ORDER BY
                             d.name ASC,

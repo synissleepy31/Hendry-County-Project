@@ -337,13 +337,24 @@
                         <div class="assessment-card-top">
 
                             <div
-                                class="assessment-department-mark"
+                                class="assessment-department-mark <%= assessment.department_logo ? 'has-logo' : '' %>"
                                 data-accent-color="<%= assessment.department_color %>"
                             >
 
-                                <span>
-                                    <%= assessment.department_code %>
-                                </span>
+                                <% if (assessment.department_logo) { %>
+
+                                    <img
+                                        src="<%= assessment.department_logo %>"
+                                        alt="<%= assessment.department_name %>"
+                                    >
+
+                                <% } else { %>
+
+                                    <span>
+                                        <%= assessment.department_code %>
+                                    </span>
+
+                                <% } %>
 
                             </div>
 
