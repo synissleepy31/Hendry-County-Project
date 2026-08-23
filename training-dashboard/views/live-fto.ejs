@@ -1087,6 +1087,17 @@
                                         ${escapeHtml(row.answer_text || "No written response")}
                                     </p>
 
+
+                                    ${row.fto_marking_guidance
+                                        ? `
+                                            <div class="live-fto-guidance">
+                                                <strong>FTO MARKING GUIDANCE</strong>
+                                                <p>${escapeHtml(row.fto_marking_guidance)}</p>
+                                            </div>
+                                        `
+                                        : ""
+                                    }
+
                                 </div>
 
 

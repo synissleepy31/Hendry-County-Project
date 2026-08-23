@@ -170,4 +170,38 @@ export async function ensureSpecialTrainingDepartments() {
 }
 
 
+export async function ensureQuestionGuidanceColumn() {
+
+    const [
+        rows
+    ] =
+        await trainingDatabase.execute(
+            `
+                SELECT COLUMN_NAME
+
+                FROM information_schema.COLUMNS
+
+                WHERE
+                    TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'training_questions'
+                    AND COLUMN_NAME = 'fto_marking_guidance'
+            `
+        );
+
+
+    if (!rows.length) {
+
+        await trainingDatabase.execute(
+            `
+                ALTER TABLE training_questions
+
+                ADD COLUMN fto_marking_guidance
+                TEXT NULL
+                AFTER requires_manual_marking
+            `
+        );
+    }
+}
+
+
 export default trainingDatabase;

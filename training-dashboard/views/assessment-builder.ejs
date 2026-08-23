@@ -494,6 +494,26 @@
 
                                             <% } %>
 
+
+                                            <% if (
+                                                question.requires_manual_marking &&
+                                                question.fto_marking_guidance
+                                            ) { %>
+
+                                                <div class="builder-fto-guidance-preview">
+
+                                                    <strong>
+                                                        FTO MARKING GUIDANCE
+                                                    </strong>
+
+                                                    <p>
+                                                        <%= question.fto_marking_guidance %>
+                                                    </p>
+
+                                                </div>
+
+                                            <% } %>
+
                                         </div>
 
 
@@ -1060,6 +1080,26 @@
                         This question will be marked manually by the FTO.
                     </div>
 
+
+                    <div
+                        id="ftoMarkingGuidanceField"
+                        class="training-field training-field-full builder-hidden"
+                    >
+                        <label>
+                            FTO Marking Guidance
+                        </label>
+
+                        <textarea
+                            name="fto_marking_guidance"
+                            rows="7"
+                            placeholder="Explain what the FTO should look for when marking this written or practical response..."
+                        ></textarea>
+
+                        <small class="training-field-help">
+                            Only FTOs will see this guidance. Trainees will never see it.
+                        </small>
+                    </div>
+
                 </div>
 
 
@@ -1321,6 +1361,16 @@
                     "practical"
                 ].includes(type)
             );
+
+            document
+                .getElementById(
+                    "ftoMarkingGuidanceField"
+                )
+                .classList.toggle(
+                    "builder-hidden",
+                    !isManual
+                );
+
         }
 
 

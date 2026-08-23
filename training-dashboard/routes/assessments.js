@@ -1,6 +1,6 @@
 import express from "express";
 
-import trainingDatabase, { ensureSpecialTrainingDepartments } from "../services/database.js";
+import trainingDatabase, { ensureSpecialTrainingDepartments, ensureQuestionGuidanceColumn } from "../services/database.js";
 import { requireManagement } from "../services/permissions.js";
 
 
@@ -109,6 +109,9 @@ router.get(
     ) => {
 
         try {
+
+            await ensureQuestionGuidanceColumn();
+
 
             await ensureSpecialTrainingDepartments();
 
@@ -610,6 +613,336 @@ router.post(
 
 
 // ======================================================
+// CLONE ASSESSMENT
+// ======================================================
+
+router.post(
+    "/training/assessments/:id/clone",
+    requireTrainingLogin,
+    async (
+        req,
+        res
+    ) => {
+
+        let connection;
+
+
+        try {
+
+            await ensureQuestionGuidanceColumn();
+
+
+            const sourceAssessmentId =
+                Number(
+                    req.params.id
+                );
+
+
+            const departmentId =
+                Number(
+                    req.body.department_id
+                );
+
+
+            const newName =
+                String(
+                    req.body.name ||
+                    ""
+                ).trim();
+
+
+            if (
+                !sourceAssessmentId ||
+                !departmentId ||
+                !newName
+            ) {
+
+                return res.redirect(
+                    "/training/assessments?error=" +
+                    encodeURIComponent(
+                        "Choose a department and enter a name for the copied assessment."
+                    )
+                );
+            }
+
+
+            const [
+                sourceRows
+            ] =
+                await trainingDatabase.execute(
+                    `
+                        SELECT
+                            id,
+                            description,
+                            pass_mark_percent
+
+                        FROM training_assessments
+
+                        WHERE id = ?
+
+                        LIMIT 1
+                    `,
+                    [
+                        sourceAssessmentId
+                    ]
+                );
+
+
+            if (!sourceRows.length) {
+
+                return res.redirect(
+                    "/training/assessments?error=" +
+                    encodeURIComponent(
+                        "Source assessment not found."
+                    )
+                );
+            }
+
+
+            connection =
+                await trainingDatabase.getConnection();
+
+
+            await connection.beginTransaction();
+
+
+            const source =
+                sourceRows[0];
+
+
+            const [
+                assessmentResult
+            ] =
+                await connection.execute(
+                    `
+                        INSERT INTO training_assessments
+                        (
+                            department_id,
+                            name,
+                            description,
+                            pass_mark_percent,
+                            is_active
+                        )
+
+                        VALUES
+                        (
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            1
+                        )
+                    `,
+                    [
+                        departmentId,
+                        newName,
+                        source.description,
+                        source.pass_mark_percent
+                    ]
+                );
+
+
+            const newAssessmentId =
+                Number(
+                    assessmentResult.insertId
+                );
+
+
+            const [
+                sections
+            ] =
+                await connection.execute(
+                    `
+                        SELECT *
+
+                        FROM training_sections
+
+                        WHERE assessment_id = ?
+
+                        ORDER BY
+                            display_order ASC,
+                            id ASC
+                    `,
+                    [
+                        sourceAssessmentId
+                    ]
+                );
+
+
+            for (
+                const section
+                of sections
+            ) {
+
+                const [
+                    sectionResult
+                ] =
+                    await connection.execute(
+                        `
+                            INSERT INTO training_sections
+                            (
+                                assessment_id,
+                                title,
+                                subtitle,
+                                trainee_content,
+                                fto_notes,
+                                section_type,
+                                display_order,
+                                is_active
+                            )
+
+                            VALUES
+                            (
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?
+                            )
+                        `,
+                        [
+                            newAssessmentId,
+                            section.title,
+                            section.subtitle,
+                            section.trainee_content,
+                            section.fto_notes,
+                            section.section_type,
+                            section.display_order,
+                            section.is_active
+                        ]
+                    );
+
+
+                const newSectionId =
+                    Number(
+                        sectionResult.insertId
+                    );
+
+
+                const [
+                    questions
+                ] =
+                    await connection.execute(
+                        `
+                            SELECT *
+
+                            FROM training_questions
+
+                            WHERE section_id = ?
+
+                            ORDER BY
+                                display_order ASC,
+                                id ASC
+                        `,
+                        [
+                            section.id
+                        ]
+                    );
+
+
+                for (
+                    const question
+                    of questions
+                ) {
+
+                    await connection.execute(
+                        `
+                            INSERT INTO training_questions
+                            (
+                                section_id,
+                                question_text,
+                                question_type,
+                                options_json,
+                                correct_answer_json,
+                                max_marks,
+                                requires_manual_marking,
+                                fto_marking_guidance,
+                                display_order,
+                                is_active
+                            )
+
+                            VALUES
+                            (
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?
+                            )
+                        `,
+                        [
+                            newSectionId,
+                            question.question_text,
+                            question.question_type,
+                            question.options_json,
+                            question.correct_answer_json,
+                            question.max_marks,
+                            question.requires_manual_marking,
+                            question.fto_marking_guidance,
+                            question.display_order,
+                            question.is_active
+                        ]
+                    );
+                }
+            }
+
+
+            await connection.commit();
+
+
+            return res.redirect(
+                `/training/assessments/${newAssessmentId}?message=` +
+                encodeURIComponent(
+                    "Assessment copied successfully. You can now edit the copy."
+                )
+            );
+
+
+        } catch (error) {
+
+            if (connection) {
+
+                try {
+                    await connection.rollback();
+                } catch {
+                    // Ignore rollback failure.
+                }
+            }
+
+
+            console.error(
+                "[TRAINING ASSESSMENT] Clone error:",
+                error
+            );
+
+
+            return res.redirect(
+                "/training/assessments?error=" +
+                encodeURIComponent(
+                    "Could not copy that assessment."
+                )
+            );
+
+
+        } finally {
+
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+);
+
+
+// ======================================================
 // DELETE / ARCHIVE ASSESSMENT
 // ======================================================
 
@@ -865,6 +1198,9 @@ router.get(
 
         try {
 
+            await ensureQuestionGuidanceColumn();
+
+
             const assessmentId =
                 Number(req.params.id);
 
@@ -977,6 +1313,7 @@ router.get(
                             q.correct_answer_json,
                             q.max_marks,
                             q.requires_manual_marking,
+                            q.fto_marking_guidance,
                             q.display_order,
                             q.is_active
 
@@ -1236,6 +1573,7 @@ router.post(
 
                     VALUES
                     (
+                        ?,
                         ?,
                         ?,
                         ?,
@@ -1503,6 +1841,9 @@ router.post(
 
         try {
 
+            await ensureQuestionGuidanceColumn();
+
+
             const questionText =
                 String(
                     req.body.question_text || ""
@@ -1700,6 +2041,18 @@ router.post(
             }
 
 
+            const ftoMarkingGuidance =
+                (
+                    questionType === "text" ||
+                    questionType === "practical"
+                )
+                    ? String(
+                        req.body.fto_marking_guidance ||
+                        ""
+                    ).trim()
+                    : "";
+
+
             const [
                 orderRows
             ] =
@@ -1732,6 +2085,7 @@ router.post(
                         correct_answer_json,
                         max_marks,
                         requires_manual_marking,
+                        fto_marking_guidance,
                         display_order,
                         is_active
                     )
@@ -1757,6 +2111,7 @@ router.post(
                     correctAnswerJson,
                     maxMarks,
                     requiresManualMarking,
+                    ftoMarkingGuidance || null,
                     Number(
                         orderRows[0].next_order || 0
                     )

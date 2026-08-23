@@ -471,6 +471,19 @@
 
                             <button
                                 type="button"
+                                class="department-edit-button assessment-copy-button"
+
+                                data-id="<%= assessment.id %>"
+                                data-name="<%= assessment.name %>"
+
+                                onclick="openCopyAssessment(this)"
+                            >
+                                Copy Assessment
+                            </button>
+
+
+                            <button
+                                type="button"
                                 class="department-edit-button"
 
                                 data-id="<%= assessment.id %>"
@@ -522,6 +535,107 @@
         <% } %>
 
     </main>
+
+
+    <!-- COPY ASSESSMENT MODAL -->
+
+    <div
+        id="copyAssessmentModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        OWNER TOOL
+                    </div>
+
+                    <h2>
+                        Copy Assessment
+                    </h2>
+
+                    <p class="builder-modal-subtitle">
+                        Copies every section, question, answer, FTO note and marking guide.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeCopyAssessment()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="copyAssessmentForm"
+                method="POST"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            New Department
+                        </label>
+
+                        <select
+                            name="department_id"
+                            required
+                        >
+
+                            <% departments.forEach(department => { %>
+
+                                <option value="<%= department.id %>">
+                                    <%= department.short_code %> — <%= department.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            New Assessment Name
+                        </label>
+
+                        <input
+                            id="copyAssessmentName"
+                            type="text"
+                            name="name"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Copy Full Assessment
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
 
 
     <!-- ================================================== -->
@@ -1052,7 +1166,50 @@
             }
         );
 
-    </script>
+    
+        function openCopyAssessment(
+            button
+        ) {
+
+            document
+                .getElementById(
+                    "copyAssessmentName"
+                )
+                .value =
+                `${button.dataset.name} Copy`;
+
+
+            document
+                .getElementById(
+                    "copyAssessmentForm"
+                )
+                .action =
+                `/training/assessments/${button.dataset.id}/clone`;
+
+
+            document
+                .getElementById(
+                    "copyAssessmentModal"
+                )
+                .classList.add(
+                    "open"
+                );
+        }
+
+
+        function closeCopyAssessment() {
+
+            document
+                .getElementById(
+                    "copyAssessmentModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+</script>
 
 </body>
 

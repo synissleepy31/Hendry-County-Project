@@ -1,5 +1,5 @@
 import express from "express";
-import trainingDatabase from "../services/database.js";
+import trainingDatabase, { ensureQuestionGuidanceColumn } from "../services/database.js";
 import { getPermissions, requireFtoAccess, canAccessDepartment, renderAccessDenied } from "../services/permissions.js";
 
 const router = express.Router();
@@ -421,6 +421,9 @@ router.get(
     requireFtoAccess,
     async (req, res) => {
         try {
+
+            await ensureQuestionGuidanceColumn();
+
             await ensureSubmissionTables();
 
             const attemptId =
@@ -485,23 +488,27 @@ router.get(
                 await trainingDatabase.execute(
                     `
                         SELECT
-                            id,
-                            question_id,
-                            question_text,
-                            question_type,
-                            answer_text,
-                            answer_json,
-                            is_correct,
-                            awarded_marks,
-                            max_marks,
-                            requires_manual_marking,
-                            review_notes,
-                            reviewed_by_discord_id,
-                            reviewed_at
+                            taa.id,
+                            taa.question_id,
+                            taa.question_text,
+                            taa.question_type,
+                            taa.answer_text,
+                            taa.answer_json,
+                            taa.is_correct,
+                            taa.awarded_marks,
+                            taa.max_marks,
+                            taa.requires_manual_marking,
+                            taa.review_notes,
+                            taa.reviewed_by_discord_id,
+                            taa.reviewed_at,
+                            q.fto_marking_guidance
 
-                        FROM training_attempt_answers
+                        FROM training_attempt_answers taa
 
-                        WHERE attempt_id = ?
+                        LEFT JOIN training_questions q
+                            ON q.id = taa.question_id
+
+                        WHERE taa.attempt_id = ?
 
                         ORDER BY id ASC
                     `,

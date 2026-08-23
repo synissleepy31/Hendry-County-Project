@@ -1,6 +1,6 @@
 import express from "express";
 
-import trainingDatabase from "../services/database.js";
+import trainingDatabase, { ensureQuestionGuidanceColumn } from "../services/database.js";
 
 import {
     canAccessDepartment,
@@ -281,6 +281,9 @@ async function getSections(
 async function getQuestions(
     assessmentId
 ) {
+
+    await ensureQuestionGuidanceColumn();
+
     const [
         rows
     ] =
@@ -295,6 +298,7 @@ async function getQuestions(
                     q.correct_answer_json,
                     q.max_marks,
                     q.requires_manual_marking,
+                    q.fto_marking_guidance,
                     q.display_order
 
                 FROM training_questions q
@@ -2855,6 +2859,7 @@ router.get(
                             la.fto_notes,
 
                             q.question_text,
+                            q.fto_marking_guidance,
 
                             u.username,
                             u.display_name,

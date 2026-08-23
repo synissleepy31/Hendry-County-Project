@@ -308,6 +308,23 @@
                                     <%= answer.question_text %>
                                 </h3>
 
+                                <% if (answer.fto_marking_guidance) { %>
+
+                                    <div class="fto-marking-guidance">
+
+                                        <span>
+                                            FTO MARKING GUIDANCE
+                                        </span>
+
+                                        <p>
+                                            <%= answer.fto_marking_guidance %>
+                                        </p>
+
+                                    </div>
+
+                                <% } %>
+
+
                                 <div class="fto-answer-response">
                                     <span>
                                         TRAINEE RESPONSE
