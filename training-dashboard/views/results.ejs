@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Results | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+
+</head>
+
+
+<body>
+
+<header class="training-topbar">
+
+    <a
+        href="/training"
+        class="training-brand"
+    >
+
+        <div class="training-brand-logo">
+
+            <img
+                src="/public/images/HCPIT.png"
+                alt="HCP Interactive Training"
+            >
+
+        </div>
+
+
+        <div class="training-brand-text">
+
+            <strong>
+                Hendry County
+            </strong>
+
+            <span>
+                Interactive Training
+            </span>
+
+        </div>
+
+    </a>
+
+
+    <nav class="training-nav">
+
+        <a href="/training">
+            Home
+        </a>
+
+
+        <% if (permissions.traineeDepartments.length > 0) { %>
+
+            <a href="/training/my-training">
+                My Training
+            </a>
+
+        <% } %>
+
+
+        <% if (permissions.isManagement) { %>
+
+            <a href="/training/departments">
+                Departments
+            </a>
+
+            <a href="/training/assessments">
+                Assessments
+            </a>
+
+        <% } %>
+
+
+        <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+            <a href="/training/schedule">
+                Schedule
+            </a>
+
+            <a href="/training/fto-review">
+                FTO Review
+            </a>
+
+        <% } %>
+
+
+        <a
+            href="/training/results"
+            class="active"
+        >
+            Results
+        </a>
+
+    </nav>
+
+
+    <div class="training-user-box">
+
+        <img
+            src="<%= user.avatar %>"
+            alt="<%= user.displayName %>"
+        >
+
+        <div class="training-user-info">
+
+            <strong>
+                <%= user.displayName %>
+            </strong>
+
+            <span>
+                <% if (permissions.isManagement) { %>
+                    Training Management
+                <% } else if (permissions.ftoDepartments.length > 0) { %>
+                    FTO
+                <% } else { %>
+                    Trainee
+                <% } %>
+            </span>
+
+        </div>
+
+
+        <a
+            href="/logout"
+            class="training-logout"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</header>
+
+
+<main class="training-page results-page">
+
+    <section class="results-heading">
+
+        <div>
+
+            <div class="training-eyebrow">
+                TRAINING RECORDS
+            </div>
+
+            <h1>
+                Results
+            </h1>
+
+            <p>
+
+                <% if (permissions.isManagement) { %>
+
+                    Review all official Interactive Training results.
+
+                <% } else if (permissions.ftoDepartments.length > 0) { %>
+
+                    Review official results for your FTO department.
+
+                <% } else { %>
+
+                    View your completed and pending training results.
+
+                <% } %>
+
+            </p>
+
+        </div>
+
+
+        <div class="results-count">
+
+            <span>
+                RECORDS
+            </span>
+
+            <strong>
+                <%= results.length %>
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <% if (message) { %>
+
+        <div class="training-alert success">
+            <%= message %>
+        </div>
+
+    <% } %>
+
+
+    <% if (error) { %>
+
+        <div class="training-alert error">
+            <%= error %>
+        </div>
+
+    <% } %>
+
+
+    <% if (!results.length) { %>
+
+        <section class="results-empty">
+
+            <h2>
+                No training results yet.
+            </h2>
+
+            <p>
+
+                <% if (permissions.traineeDepartments.length > 0) { %>
+
+                    Your official training results will appear here after you submit or complete training.
+
+                <% } else { %>
+
+                    No matching training records have been created yet.
+
+                <% } %>
+
+            </p>
+
+        </section>
+
+    <% } else { %>
+
+        <section class="results-grid">
+
+            <% results.forEach(result => { %>
+
+                <article class="result-history-card <%= result.final_outcome %>">
+
+                    <div class="result-history-top">
+
+                        <div>
+
+                            <span class="result-department">
+                                <%= result.department_code %>
+                            </span>
+
+                            <h2>
+                                <%= result.assessment_name %>
+                            </h2>
+
+                            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+                                <p class="result-trainee-name">
+                                    <%= result.trainee_username %>
+                                </p>
+
+                            <% } %>
+
+                        </div>
+
+
+                        <span class="result-outcome <%= result.final_outcome %>">
+
+                            <% if (result.status === "pending_review") { %>
+
+                                PENDING REVIEW
+
+                            <% } else { %>
+
+                                <%= String(result.final_outcome).toUpperCase() %>
+
+                            <% } %>
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="result-history-stats">
+
+                        <div>
+
+                            <span>
+                                SCORE
+                            </span>
+
+                            <strong>
+
+                                <% if (result.percentage === null) { %>
+
+                                    Pending
+
+                                <% } else { %>
+
+                                    <%= Number(result.percentage).toFixed(2) %>%
+
+                                <% } %>
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                MARKS
+                            </span>
+
+                            <strong>
+                                <%= Number(result.total_marks || 0).toFixed(0) %>
+                                /
+                                <%= Number(result.max_marks || 0).toFixed(0) %>
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                PASS MARK
+                            </span>
+
+                            <strong>
+                                <%= Number(result.pass_mark_percent || 70).toFixed(0) %>%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-history-footer">
+
+                        <span>
+
+                            <%= new Date(result.reviewed_at || result.submitted_at).toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }) %>
+
+                        </span>
+
+
+                        <% if (
+                            String(result.trainee_discord_id) === String(user.id)
+                        ) { %>
+
+                            <a
+                                href="/training/my-training/results/<%= result.id %>"
+                                class="result-view-button"
+                            >
+                                View My Result →
+                            </a>
+
+                        <% } else if (
+                            permissions.isManagement ||
+                            permissions.ftoDepartments.length > 0
+                        ) { %>
+
+                            <a
+                                href="/training/fto-review/<%= result.id %>"
+                                class="result-view-button"
+                            >
+                                View Record →
+                            </a>
+
+                        <% } %>
+
+                    </div>
+
+                </article>
+
+            <% }) %>
+
+        </section>
+
+    <% } %>
+
+</main>
+
+</body>
+
+</html>

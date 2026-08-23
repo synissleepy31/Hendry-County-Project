@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>No Permissions | HCP Interactive Training</title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+<body class="training-denied-body">
+
+    <main class="training-denied-page">
+
+        <section class="training-denied-card">
+
+            <div class="training-denied-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="Hendry County Project Interactive Training"
+                >
+            </div>
+
+            <div class="training-denied-eyebrow">
+                HENDRY COUNTY PROJECT
+            </div>
+
+            <h1>
+                <span>NO</span>
+                <strong>PERMISSIONS</strong>
+            </h1>
+
+            <p>
+                <%= message || "You do not have permission to access this section of Hendry County Project Interactive Training." %>
+            </p>
+
+            <a
+                href="/training"
+                class="training-denied-button"
+            >
+                ← Back to Dashboard
+            </a>
+
+            <small>
+                Access restricted by training permissions
+            </small>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

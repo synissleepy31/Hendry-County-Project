@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Attendance | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+
+</head>
+
+
+<body class="attendance-response-body">
+
+    <main class="attendance-response-page">
+
+        <section class="attendance-response-card <%= status %>">
+
+            <img
+                src="/public/images/HCPIT.png"
+                alt="HCP Interactive Training"
+            >
+
+            <div class="training-eyebrow">
+                <%= session.department_code %>
+                TRAINING
+            </div>
+
+
+            <h1>
+                <%= message %>
+            </h1>
+
+
+            <p>
+                <strong>
+                    <%= session.assessment_name %>
+                </strong>
+
+                <br>
+
+                <%= session.scheduled_for
+                    ? new Date(session.scheduled_for).toLocaleString()
+                    : "Time TBC" %>
+            </p>
+
+
+            <div class="attendance-response-actions">
+
+                <% if (!["closed", "full"].includes(status)) { %>
+
+                    <a
+                        href="/training/schedule/<%= session.id %>/attendance/attending"
+                        class="attendance-response-button attending"
+                    >
+                        ✅ Attending
+                    </a>
+
+                    <a
+                        href="/training/schedule/<%= session.id %>/attendance/maybe"
+                        class="attendance-response-button maybe"
+                    >
+                        ❓ Maybe
+                    </a>
+
+                    <a
+                        href="/training/schedule/<%= session.id %>/attendance/unavailable"
+                        class="attendance-response-button unavailable"
+                    >
+                        ❌ Unavailable
+                    </a>
+
+                <% } %>
+
+
+                <a
+                    href="/training"
+                    class="attendance-response-button dashboard"
+                >
+                    Back to Training Dashboard
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

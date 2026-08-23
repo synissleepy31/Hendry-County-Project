@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Live Results | <%= session.assessment_name %>
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+
+<body>
+
+<header class="training-topbar">
+
+    <a
+        href="/training"
+        class="training-brand"
+    >
+
+        <div class="training-brand-logo">
+
+            <img
+                src="/public/images/HCPIT.png"
+                alt="HCP"
+            >
+
+        </div>
+
+        <div class="training-brand-text">
+
+            <strong>
+                Hendry County
+            </strong>
+
+            <span>
+                Interactive Training
+            </span>
+
+        </div>
+
+    </a>
+
+
+    <nav class="training-nav">
+
+        <a href="/training">
+            Home
+        </a>
+
+        <a href="/training/schedule">
+            Schedule
+        </a>
+
+        <a href="/training/fto-review">
+            FTO Review
+        </a>
+
+        <a href="/training/results">
+            Results
+        </a>
+
+    </nav>
+
+
+    <div class="training-user-box">
+
+        <img
+            src="<%= user.avatar %>"
+            alt="<%= user.displayName %>"
+        >
+
+        <div class="training-user-info">
+
+            <strong>
+                <%= user.displayName %>
+            </strong>
+
+            <span>
+                FTO
+            </span>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="training-page live-summary-page">
+
+    <a
+        href="/training/schedule/<%= session.id %>"
+        class="builder-back-link"
+    >
+        ← Session Details
+    </a>
+
+
+    <section class="live-summary-heading">
+
+        <div>
+
+            <div class="training-eyebrow">
+                <%= session.department_code %>
+                ·
+                OFFICIAL RESULTS
+            </div>
+
+            <h1>
+                Live Training Complete
+            </h1>
+
+            <p>
+                <%= session.assessment_name %>
+                has been converted into official training records.
+            </p>
+
+        </div>
+
+
+        <span class="schedule-status completed large">
+            COMPLETED
+        </span>
+
+    </section>
+
+
+    <section class="live-summary-grid">
+
+        <% if (!attempts.length) { %>
+
+            <div class="schedule-empty">
+
+                <h2>
+                    No official attempts found.
+                </h2>
+
+                <p>
+                    No trainee records were generated for this session.
+                </p>
+
+            </div>
+
+        <% } %>
+
+
+        <% attempts.forEach(attempt => { %>
+
+            <article class="live-summary-card <%= attempt.final_outcome %>">
+
+                <div class="live-summary-card-top">
+
+                    <div>
+
+                        <span>
+                            TRAINEE
+                        </span>
+
+                        <h2>
+                            <%= attempt.trainee_username %>
+                        </h2>
+
+                    </div>
+
+
+                    <span class="live-summary-outcome <%= attempt.final_outcome %>">
+
+                        <% if (attempt.status === "pending_review") { %>
+                            PENDING FTO REVIEW
+                        <% } else { %>
+                            <%= attempt.final_outcome.toUpperCase() %>
+                        <% } %>
+
+                    </span>
+
+                </div>
+
+
+                <div class="live-summary-marks">
+
+                    <div>
+
+                        <span>
+                            AUTO
+                        </span>
+
+                        <strong>
+                            <%= Number(attempt.auto_marks || 0).toFixed(0) %>
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            MANUAL
+                        </span>
+
+                        <strong>
+                            <%= Number(attempt.manual_marks || 0).toFixed(0) %>
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            TOTAL
+                        </span>
+
+                        <strong>
+                            <%= Number(attempt.total_marks || 0).toFixed(0) %>
+                            /
+                            <%= Number(attempt.max_marks || 0).toFixed(0) %>
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            SCORE
+                        </span>
+
+                        <strong>
+                            <%= attempt.percentage === null
+                                ? "Pending"
+                                : `${Number(attempt.percentage).toFixed(2)}%` %>
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <% if (attempt.status === "pending_review") { %>
+
+                    <p class="live-summary-note">
+                        One or more written/practical items still need an FTO mark.
+                    </p>
+
+                    <a
+                        href="/training/fto-review/<%= attempt.id %>"
+                        class="training-save-button"
+                    >
+                        Complete FTO Review →
+                    </a>
+
+                <% } else { %>
+
+                    <p class="live-summary-note">
+
+                        Official result saved.
+
+                        <% if (attempt.final_outcome === "pass") { %>
+
+                            The department PASS role automation has been triggered.
+
+                        <% } else { %>
+
+                            FAIL means no Discord roles were changed.
+
+                        <% } %>
+
+                    </p>
+
+                    <a
+                        href="/training/fto-review/<%= attempt.id %>"
+                        class="training-save-button"
+                    >
+                        View Official Result →
+                    </a>
+
+                <% } %>
+
+            </article>
+
+        <% }) %>
+
+    </section>
+
+</main>
+
+</body>
+</html>

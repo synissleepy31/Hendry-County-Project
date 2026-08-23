@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Departments | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- ================================================== -->
+    <!-- TOP BAR -->
+    <!-- ================================================== -->
+
+    <header class="training-topbar">
+
+        <a
+            href="/training"
+            class="training-brand"
+        >
+
+            <div class="training-brand-logo">
+
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+
+            </div>
+
+
+            <div class="training-brand-text">
+
+                <strong>
+                    Hendry County
+                </strong>
+
+                <span>
+                    Interactive Training
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <nav class="training-nav">
+
+            <a href="/training">
+                Home
+            </a>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/departments"
+                class="active"
+            >
+
+
+                    Departments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/assessments">
+
+
+                    Assessments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+
+                <a href="/training/schedule">
+
+
+                    Schedule
+
+
+                </a>
+
+
+            <% } %>
+
+            <a href="/training/results">
+                Results
+            </a>
+
+        </nav>
+
+
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Account Connected
+                </span>
+
+            </div>
+
+            <a
+                href="/logout"
+                class="training-logout"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================================================== -->
+    <!-- PAGE -->
+    <!-- ================================================== -->
+
+    <main class="training-page">
+
+
+        <!-- HERO -->
+
+        <section class="department-page-header">
+
+            <div>
+
+                <div class="training-eyebrow">
+                    MANAGEMENT
+                </div>
+
+
+                <h1 class="department-page-title">
+                    Departments
+                </h1>
+
+
+                <p class="department-page-description">
+                    Create and manage departments used throughout
+                    Hendry County Interactive Training.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="department-create-button"
+                onclick="openCreateDepartment()"
+            >
+                + New Department
+            </button>
+
+        </section>
+
+
+        <!-- SUCCESS -->
+
+        <% if (message) { %>
+
+            <div class="training-alert success">
+                <%= message %>
+            </div>
+
+        <% } %>
+
+
+        <!-- ERROR -->
+
+        <% if (error) { %>
+
+            <div class="training-alert error">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+
+        <!-- ================================================== -->
+        <!-- DEPARTMENT GRID -->
+        <!-- ================================================== -->
+
+        <% if (!departments.length) { %>
+
+            <section class="department-empty">
+
+                <div class="department-empty-icon">
+                    ◆
+                </div>
+
+                <h2>
+                    No Departments Yet
+                </h2>
+
+                <p>
+                    Create your first department to start building
+                    assessments and training sessions.
+                </p>
+
+                <button
+                    type="button"
+                    class="department-create-button"
+                    onclick="openCreateDepartment()"
+                >
+                    + Create Department
+                </button>
+
+            </section>
+
+        <% } else { %>
+
+
+            <section class="department-grid">
+
+                <% departments.forEach(department => { %>
+
+                    <article class="department-card">
+
+                        <div class="department-card-top">
+
+<div
+    class="department-logo"
+    data-accent-color="<%= department.accent_color %>"
+>
+                            >
+
+                                <% if (department.logo_url) { %>
+
+                                    <img
+                                        src="<%= department.logo_url %>"
+                                        alt="<%= department.name %>"
+                                    >
+
+                                <% } else { %>
+
+                                    <strong>
+                                        <%= department.short_code %>
+                                    </strong>
+
+                                <% } %>
+
+                            </div>
+
+
+                            <div class="department-status">
+
+                                <% if (department.is_active) { %>
+
+                                    <span class="department-status-active">
+                                        Active
+                                    </span>
+
+                                <% } else { %>
+
+                                    <span class="department-status-inactive">
+                                        Disabled
+                                    </span>
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="department-code">
+                            <%= department.short_code %>
+                        </div>
+
+
+                        <h2>
+                            <%= department.name %>
+                        </h2>
+
+
+                        <p class="department-description">
+
+                            <%= department.description || "No department description has been added yet." %>
+
+                        </p>
+
+
+                        <div class="department-details">
+
+                            <div>
+
+                                <span>
+                                    Scheduling Channel
+                                </span>
+
+                                <strong>
+                                    <%= department.scheduling_channel_id || "Not configured" %>
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Results Channel
+                                </span>
+
+                                <strong>
+                                    <%= department.results_channel_id || "Not configured" %>
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="department-card-actions">
+
+<button
+    type="button"
+    class="department-edit-button"
+
+    data-id="<%= department.id %>"
+    data-name="<%= department.name %>"
+    data-short-code="<%= department.short_code %>"
+    data-description="<%= department.description || '' %>"
+    data-logo-url="<%= department.logo_url || '' %>"
+    data-accent-color="<%= department.accent_color || '#bfc2c7' %>"
+    data-scheduling-channel-id="<%= department.scheduling_channel_id || '' %>"
+    data-results-channel-id="<%= department.results_channel_id || '' %>"
+    data-is-active="<%= department.is_active ? '1' : '0' %>"
+
+    onclick="openEditDepartmentFromButton(this)"
+>
+    Edit Department
+</button>
+
+
+                            <form
+                                method="POST"
+                                action="/training/departments/<%= department.id %>/delete"
+                                onsubmit="return confirm('Delete <%= department.name %>? This cannot be undone.');"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="department-delete-button"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </article>
+
+                <% }) %>
+
+            </section>
+
+        <% } %>
+
+    </main>
+
+
+    <!-- ================================================== -->
+    <!-- CREATE DEPARTMENT MODAL -->
+    <!-- ================================================== -->
+
+    <div
+        id="createDepartmentModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        NEW DEPARTMENT
+                    </div>
+
+                    <h2>
+                        Create Department
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeCreateDepartment()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="/training/departments/create"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field">
+
+                        <label>
+                            Department Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Hendry County Sheriff's Office"
+                            maxlength="150"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Short Code
+                        </label>
+
+                        <input
+                            type="text"
+                            name="short_code"
+                            placeholder="HCSO"
+                            maxlength="20"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            name="description"
+                            rows="4"
+                            placeholder="Department description..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Department Logo URL
+                        </label>
+
+                        <input
+                            type="url"
+                            name="logo_url"
+                            placeholder="https://..."
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Accent Colour
+                        </label>
+
+                        <input
+                            type="color"
+                            name="accent_color"
+                            value="#bfc2c7"
+                        >
+
+                    </div>
+
+
+                    <div></div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Scheduling Channel ID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="scheduling_channel_id"
+                            placeholder="Discord Channel ID"
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Results Channel ID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="results_channel_id"
+                            placeholder="Discord Channel ID"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Create Department
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- EDIT DEPARTMENT MODAL -->
+    <!-- ================================================== -->
+
+    <div
+        id="editDepartmentModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        DEPARTMENT SETTINGS
+                    </div>
+
+                    <h2>
+                        Edit Department
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeEditDepartment()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="editDepartmentForm"
+                method="POST"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field">
+
+                        <label>
+                            Department Name
+                        </label>
+
+                        <input
+                            id="edit_name"
+                            type="text"
+                            name="name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Short Code
+                        </label>
+
+                        <input
+                            id="edit_short_code"
+                            type="text"
+                            name="short_code"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            id="edit_description"
+                            name="description"
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Department Logo URL
+                        </label>
+
+                        <input
+                            id="edit_logo_url"
+                            type="url"
+                            name="logo_url"
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Accent Colour
+                        </label>
+
+                        <input
+                            id="edit_accent_color"
+                            type="color"
+                            name="accent_color"
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Status
+                        </label>
+
+                        <select
+                            id="edit_is_active"
+                            name="is_active"
+                        >
+
+                            <option value="1">
+                                Active
+                            </option>
+
+                            <option value="0">
+                                Disabled
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Scheduling Channel ID
+                        </label>
+
+                        <input
+                            id="edit_scheduling_channel_id"
+                            type="text"
+                            name="scheduling_channel_id"
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Results Channel ID
+                        </label>
+
+                        <input
+                            id="edit_results_channel_id"
+                            type="text"
+                            name="results_channel_id"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Save Department
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+<script>
+
+    // ======================================================
+    // CREATE DEPARTMENT
+    // ======================================================
+
+    function openCreateDepartment() {
+
+        document
+            .getElementById("createDepartmentModal")
+            .classList.add("open");
+
+    }
+
+
+    function closeCreateDepartment() {
+
+        document
+            .getElementById("createDepartmentModal")
+            .classList.remove("open");
+
+    }
+
+
+    // ======================================================
+    // EDIT DEPARTMENT
+    // ======================================================
+
+    function openEditDepartmentFromButton(button) {
+
+        const department = {
+
+            id: button.dataset.id,
+
+            name: button.dataset.name,
+
+            short_code: button.dataset.shortCode,
+
+            description: button.dataset.description,
+
+            logo_url: button.dataset.logoUrl,
+
+            accent_color: button.dataset.accentColor,
+
+            scheduling_channel_id:
+                button.dataset.schedulingChannelId,
+
+            results_channel_id:
+                button.dataset.resultsChannelId,
+
+            is_active:
+                button.dataset.isActive === "1"
+
+        };
+
+
+        document.getElementById("edit_name").value =
+            department.name || "";
+
+
+        document.getElementById("edit_short_code").value =
+            department.short_code || "";
+
+
+        document.getElementById("edit_description").value =
+            department.description || "";
+
+
+        document.getElementById("edit_logo_url").value =
+            department.logo_url || "";
+
+
+        document.getElementById("edit_accent_color").value =
+            department.accent_color || "#bfc2c7";
+
+
+        document.getElementById("edit_scheduling_channel_id").value =
+            department.scheduling_channel_id || "";
+
+
+        document.getElementById("edit_results_channel_id").value =
+            department.results_channel_id || "";
+
+
+        document.getElementById("edit_is_active").value =
+            department.is_active ? "1" : "0";
+
+
+        document.getElementById("editDepartmentForm").action =
+            `/training/departments/${department.id}/update`;
+
+
+        document
+            .getElementById("editDepartmentModal")
+            .classList.add("open");
+
+    }
+
+
+    function closeEditDepartment() {
+
+        document
+            .getElementById("editDepartmentModal")
+            .classList.remove("open");
+
+    }
+
+
+    // ======================================================
+    // DEPARTMENT ACCENT COLOURS
+    // ======================================================
+
+    document
+        .querySelectorAll(".department-logo[data-accent-color]")
+        .forEach(logo => {
+
+            logo.style.borderColor =
+                logo.dataset.accentColor || "#bfc2c7";
+
+        });
+
+
+    // ======================================================
+    // CLICK OUTSIDE MODAL TO CLOSE
+    // ======================================================
+
+    window.addEventListener("click", event => {
+
+        const createModal =
+            document.getElementById("createDepartmentModal");
+
+        const editModal =
+            document.getElementById("editDepartmentModal");
+
+
+        if (event.target === createModal) {
+
+            closeCreateDepartment();
+
+        }
+
+
+        if (event.target === editModal) {
+
+            closeEditDepartment();
+
+        }
+
+    });
+
+
+    // ======================================================
+    // ESCAPE KEY TO CLOSE
+    // ======================================================
+
+    window.addEventListener("keydown", event => {
+
+        if (event.key === "Escape") {
+
+            closeCreateDepartment();
+
+            closeEditDepartment();
+
+        }
+
+    });
+
+</script>
+
+</body>
+
+</html>

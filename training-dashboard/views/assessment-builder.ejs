@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        <%= assessment.name %> | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+<body>
+
+    <header class="training-topbar">
+
+        <a
+            href="/training"
+            class="training-brand"
+        >
+            <div class="training-brand-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+            </div>
+
+            <div class="training-brand-text">
+                <strong>
+                    Hendry County
+                </strong>
+
+                <span>
+                    Interactive Training
+                </span>
+            </div>
+        </a>
+
+
+        <nav class="training-nav">
+
+            <a href="/training">
+                Home
+            </a>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/departments">
+
+
+                    Departments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/assessments"
+                class="active"
+            >
+
+
+                    Assessments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+
+                <a href="/training/schedule">
+
+
+                    Schedule
+
+
+                </a>
+
+
+            <% } %>
+
+            <a href="/training/results">
+                Results
+            </a>
+
+        </nav>
+
+
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Account Connected
+                </span>
+            </div>
+
+            <a
+                href="/logout"
+                class="training-logout"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main class="training-page assessment-builder-page">
+
+        <section class="builder-header">
+
+            <div>
+
+                <a
+                    href="/training/assessments"
+                    class="builder-back-link"
+                >
+                    ← Back to Assessments
+                </a>
+
+                <div class="training-eyebrow">
+                    <%= assessment.department_code %> · ASSESSMENT BUILDER
+                </div>
+
+                <h1 class="builder-title">
+                    <%= assessment.name %>
+                </h1>
+
+                <p class="builder-description">
+                    <%= assessment.description || "Build the trainee content, FTO notes and assessment questions for this training." %>
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="assessment-create-button"
+                onclick="openCreateSection()"
+            >
+                + Add Section
+            </button>
+
+        </section>
+
+
+        <% if (message) { %>
+
+            <div class="training-alert success">
+                <%= message %>
+            </div>
+
+        <% } %>
+
+
+        <% if (error) { %>
+
+            <div class="training-alert error">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+
+        <section class="builder-summary">
+
+            <article>
+                <span>
+                    Department
+                </span>
+
+                <strong>
+                    <%= assessment.department_code %>
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    Pass Mark
+                </span>
+
+                <strong>
+                    <%= Number(assessment.pass_mark_percent).toFixed(0) %>%
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    Sections
+                </span>
+
+                <strong>
+                    <%= sections.length %>
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    Total Marks
+                </span>
+
+                <strong>
+                    <%= Number(totalMarks).toFixed(0) %>
+                </strong>
+            </article>
+
+        </section>
+
+
+        <% if (!sections.length) { %>
+
+            <section class="builder-empty">
+
+                <div class="builder-empty-icon">
+                    +
+                </div>
+
+                <h2>
+                    This assessment has no sections yet.
+                </h2>
+
+                <p>
+                    Add your first section. A section can contain
+                    trainee-facing teaching content, private FTO notes,
+                    quiz questions, or practical assessment items.
+                </p>
+
+                <button
+                    type="button"
+                    class="assessment-create-button"
+                    onclick="openCreateSection()"
+                >
+                    + Add First Section
+                </button>
+
+            </section>
+
+        <% } else { %>
+
+            <section class="builder-sections">
+
+                <% sections.forEach((section, index) => { %>
+
+                    <% const sectionQuestions = questionsBySection[section.id] || []; %>
+
+                    <article class="builder-section">
+
+                        <div class="builder-section-header">
+
+                            <div class="builder-section-number">
+                                <%= index + 1 %>
+                            </div>
+
+                            <div class="builder-section-heading">
+
+                                <div class="builder-section-meta">
+                                    <span>
+                                        <%= section.section_type.toUpperCase() %>
+                                    </span>
+
+                                    <% if (!section.is_active) { %>
+                                        <span class="builder-disabled">
+                                            DISABLED
+                                        </span>
+                                    <% } %>
+                                </div>
+
+                                <h2>
+                                    <%= section.title %>
+                                </h2>
+
+                                <% if (section.subtitle) { %>
+                                    <p>
+                                        <%= section.subtitle %>
+                                    </p>
+                                <% } %>
+
+                            </div>
+
+                            <div class="builder-section-actions">
+
+                                <button
+                                    type="button"
+                                    class="builder-small-button"
+                                    data-id="<%= section.id %>"
+                                    data-title="<%= section.title %>"
+                                    data-subtitle="<%= section.subtitle || '' %>"
+                                    data-trainee-content="<%= section.trainee_content || '' %>"
+                                    data-fto-notes="<%= section.fto_notes || '' %>"
+                                    data-section-type="<%= section.section_type %>"
+                                    data-is-active="<%= section.is_active ? '1' : '0' %>"
+                                    onclick="openEditSection(this)"
+                                >
+                                    Edit
+                                </button>
+
+                                <form
+                                    method="POST"
+                                    action="/training/assessments/<%= assessment.id %>/sections/<%= section.id %>/delete"
+                                    onsubmit="return confirm('Delete this section and every question inside it?');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="builder-danger-button"
+                                    >
+                                        Delete
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="builder-content-grid">
+
+                            <section class="builder-content-panel trainee">
+
+                                <div class="builder-panel-label">
+                                    TRAINEE CONTENT
+                                </div>
+
+                                <% if (section.trainee_content) { %>
+
+                                    <div class="builder-rich-text">
+                                        <%= section.trainee_content %>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <div class="builder-panel-empty">
+                                        No trainee content added yet.
+                                    </div>
+
+                                <% } %>
+
+                            </section>
+
+
+                            <section class="builder-content-panel fto">
+
+                                <div class="builder-panel-label">
+                                    FTO ONLY
+                                </div>
+
+                                <% if (section.fto_notes) { %>
+
+                                    <div class="builder-rich-text">
+                                        <%= section.fto_notes %>
+                                    </div>
+
+                                <% } else { %>
+
+                                    <div class="builder-panel-empty">
+                                        No private FTO notes added yet.
+                                    </div>
+
+                                <% } %>
+
+                            </section>
+
+                        </div>
+
+
+                        <div class="builder-question-header">
+
+                            <div>
+
+                                <h3>
+                                    Questions
+                                </h3>
+
+                                <span>
+                                    <%= sectionQuestions.length %>
+                                    question<%= sectionQuestions.length === 1 ? "" : "s" %>
+                                </span>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="builder-small-button orange"
+                                data-section-id="<%= section.id %>"
+                                data-section-name="<%= section.title %>"
+                                onclick="openCreateQuestion(this)"
+                            >
+                                + Add Question
+                            </button>
+
+                        </div>
+
+
+                        <% if (!sectionQuestions.length) { %>
+
+                            <div class="builder-no-questions">
+                                No questions in this section.
+                            </div>
+
+                        <% } else { %>
+
+                            <div class="builder-question-list">
+
+                                <% sectionQuestions.forEach((question, questionIndex) => { %>
+
+                                    <article class="builder-question">
+
+                                        <div class="builder-question-number">
+                                            <%= questionIndex + 1 %>
+                                        </div>
+
+                                        <div class="builder-question-main">
+
+                                            <div class="builder-question-type">
+                                                <%= question.question_type.replaceAll("_", " ").toUpperCase() %>
+                                            </div>
+
+                                            <h4>
+                                                <%= question.question_text %>
+                                            </h4>
+
+
+                                            <% if (question.question_type === "multiple_choice") { %>
+
+                                                <div class="builder-options">
+
+                                                    <% question.options.forEach((option, optionIndex) => { %>
+
+                                                        <div
+                                                            class="<%= question.correctAnswer && Number(question.correctAnswer.index) === optionIndex ? 'correct' : '' %>"
+                                                        >
+                                                            <span>
+                                                                <%= String.fromCharCode(65 + optionIndex) %>.
+                                                            </span>
+
+                                                            <%= option %>
+                                                        </div>
+
+                                                    <% }) %>
+
+                                                </div>
+
+                                            <% } %>
+
+
+                                            <% if (question.question_type === "yes_no") { %>
+
+                                                <div class="builder-correct-answer">
+                                                    Correct answer:
+                                                    <strong>
+                                                        <%= question.correctAnswer?.value === "no" ? "No" : "Yes" %>
+                                                    </strong>
+                                                </div>
+
+                                            <% } %>
+
+
+                                            <% if (question.requires_manual_marking) { %>
+
+                                                <div class="builder-manual-badge">
+                                                    MANUAL FTO MARKING
+                                                </div>
+
+                                            <% } %>
+
+                                        </div>
+
+
+                                        <div class="builder-question-score">
+
+                                            <strong>
+                                                <%= Number(question.max_marks).toFixed(Number(question.max_marks) % 1 === 0 ? 0 : 1) %>
+                                            </strong>
+
+                                            <span>
+                                                mark<%= Number(question.max_marks) === 1 ? "" : "s" %>
+                                            </span>
+
+                                        </div>
+
+
+                                        <form
+                                            method="POST"
+                                            action="/training/assessments/<%= assessment.id %>/questions/<%= question.id %>/delete"
+                                            onsubmit="return confirm('Delete this question?');"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="builder-question-delete"
+                                                title="Delete question"
+                                            >
+                                                ×
+                                            </button>
+                                        </form>
+
+                                    </article>
+
+                                <% }) %>
+
+                            </div>
+
+                        <% } %>
+
+                    </article>
+
+                <% }) %>
+
+            </section>
+
+        <% } %>
+
+    </main>
+
+
+    <!-- CREATE SECTION MODAL -->
+    <div
+        id="createSectionModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal builder-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+                    <div class="training-eyebrow">
+                        ASSESSMENT CONTENT
+                    </div>
+
+                    <h2>
+                        Add Section
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeCreateSection()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="/training/assessments/<%= assessment.id %>/sections/create"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Section Title
+                        </label>
+
+                        <input
+                            type="text"
+                            name="title"
+                            placeholder="Section 1 — Introduction"
+                            maxlength="180"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Subtitle
+                        </label>
+
+                        <input
+                            type="text"
+                            name="subtitle"
+                            placeholder="Optional subtitle"
+                            maxlength="255"
+                        >
+                    </div>
+
+
+                    <div class="training-field">
+                        <label>
+                            Section Type
+                        </label>
+
+                        <select
+                            id="createSectionType"
+                            name="section_type"
+                            onchange="updateCreateSectionType()"
+                        >
+                            <option value="content">
+                                Content
+                            </option>
+
+                            <option value="quiz">
+                                Quiz
+                            </option>
+
+                            <option value="practical">
+                                Practical
+                            </option>
+
+                            <option value="mixed">
+                                Mixed
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div
+                        id="createSectionTypeHelp"
+                        class="builder-section-type-help training-field-full"
+                    >
+                        Content section — use Trainee Content for what trainees see and FTO Notes for private trainer guidance.
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Trainee Content
+                        </label>
+
+                        <textarea
+                            name="trainee_content"
+                            rows="8"
+                            placeholder="What trainees see during this section..."
+                        ></textarea>
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            FTO Notes
+                        </label>
+
+                        <textarea
+                            name="fto_notes"
+                            rows="8"
+                            placeholder="Private notes the FTO reads to trainees..."
+                        ></textarea>
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Add Section
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- EDIT SECTION MODAL -->
+    <div
+        id="editSectionModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal builder-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+                    <div class="training-eyebrow">
+                        SECTION SETTINGS
+                    </div>
+
+                    <h2>
+                        Edit Section
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeEditSection()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="editSectionForm"
+                method="POST"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Section Title
+                        </label>
+
+                        <input
+                            id="edit_section_title"
+                            type="text"
+                            name="title"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Subtitle
+                        </label>
+
+                        <input
+                            id="edit_section_subtitle"
+                            type="text"
+                            name="subtitle"
+                        >
+                    </div>
+
+
+                    <div class="training-field">
+                        <label>
+                            Section Type
+                        </label>
+
+                        <select
+                            id="edit_section_type"
+                            name="section_type"
+                            onchange="updateEditSectionType()"
+                        >
+                            <option value="content">
+                                Content
+                            </option>
+
+                            <option value="quiz">
+                                Quiz
+                            </option>
+
+                            <option value="practical">
+                                Practical
+                            </option>
+
+                            <option value="mixed">
+                                Mixed
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div
+                        id="editSectionTypeHelp"
+                        class="builder-section-type-help training-field-full"
+                    ></div>
+
+
+                    <div class="training-field">
+                        <label>
+                            Status
+                        </label>
+
+                        <select
+                            id="edit_section_active"
+                            name="is_active"
+                        >
+                            <option value="1">
+                                Active
+                            </option>
+
+                            <option value="0">
+                                Disabled
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Trainee Content
+                        </label>
+
+                        <textarea
+                            id="edit_section_trainee_content"
+                            name="trainee_content"
+                            rows="8"
+                        ></textarea>
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            FTO Notes
+                        </label>
+
+                        <textarea
+                            id="edit_section_fto_notes"
+                            name="fto_notes"
+                            rows="8"
+                        ></textarea>
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Save Section
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- CREATE QUESTION MODAL -->
+    <div
+        id="createQuestionModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal builder-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+                    <div class="training-eyebrow">
+                        QUESTION BUILDER
+                    </div>
+
+                    <h2>
+                        Add Question
+                    </h2>
+
+                    <p
+                        id="questionSectionName"
+                        class="builder-modal-subtitle"
+                    ></p>
+                </div>
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeCreateQuestion()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="createQuestionForm"
+                method="POST"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field training-field-full">
+                        <label>
+                            Question
+                        </label>
+
+                        <textarea
+                            name="question_text"
+                            rows="4"
+                            placeholder="Enter the question or practical task..."
+                            required
+                        ></textarea>
+                    </div>
+
+
+                    <div class="training-field">
+                        <label>
+                            Question Type
+                        </label>
+
+                        <select
+                            id="questionType"
+                            name="question_type"
+                            onchange="updateQuestionType()"
+                        >
+                            <option value="multiple_choice">
+                                Multiple Choice
+                            </option>
+
+                            <option value="yes_no">
+                                Yes / No
+                            </option>
+
+                            <option value="text">
+                                Written Response
+                            </option>
+
+                            <option value="practical">
+                                Practical Assessment
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="training-field">
+                        <label>
+                            Maximum Marks
+                        </label>
+
+                        <input
+                            type="number"
+                            name="max_marks"
+                            value="1"
+                            min="0.5"
+                            step="0.5"
+                            required
+                        >
+                    </div>
+
+
+                    <div
+                        id="multipleChoiceFields"
+                        class="builder-question-fields training-field-full"
+                    >
+
+                        <div class="training-field">
+                            <label>
+                                Answer A
+                            </label>
+
+                            <input
+                                type="text"
+                                name="option_1"
+                                placeholder="Answer A"
+                            >
+                        </div>
+
+                        <div class="training-field">
+                            <label>
+                                Answer B
+                            </label>
+
+                            <input
+                                type="text"
+                                name="option_2"
+                                placeholder="Answer B"
+                            >
+                        </div>
+
+                        <div class="training-field">
+                            <label>
+                                Answer C
+                            </label>
+
+                            <input
+                                type="text"
+                                name="option_3"
+                                placeholder="Optional"
+                            >
+                        </div>
+
+                        <div class="training-field">
+                            <label>
+                                Answer D
+                            </label>
+
+                            <input
+                                type="text"
+                                name="option_4"
+                                placeholder="Optional"
+                            >
+                        </div>
+
+                        <div class="training-field">
+                            <label>
+                                Correct Answer
+                            </label>
+
+                            <select name="correct_option">
+                                <option value="0">
+                                    Answer A
+                                </option>
+
+                                <option value="1">
+                                    Answer B
+                                </option>
+
+                                <option value="2">
+                                    Answer C
+                                </option>
+
+                                <option value="3">
+                                    Answer D
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="yesNoFields"
+                        class="training-field training-field-full builder-hidden"
+                    >
+                        <label>
+                            Correct Answer
+                        </label>
+
+                        <select name="correct_yes_no">
+                            <option value="yes">
+                                Yes
+                            </option>
+
+                            <option value="no">
+                                No
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div
+                        id="manualQuestionNotice"
+                        class="builder-manual-notice training-field-full builder-hidden"
+                    >
+                        This question will be marked manually by the FTO.
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Add Question
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function openCreateSection() {
+
+            document
+                .getElementById(
+                    "createSectionModal"
+                )
+                .classList.add(
+                    "open"
+                );
+        }
+
+
+        function closeCreateSection() {
+
+            document
+                .getElementById(
+                    "createSectionModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+        function openEditSection(
+            button
+        ) {
+
+            document.getElementById(
+                "edit_section_title"
+            ).value =
+                button.dataset.title ||
+                "";
+
+
+            document.getElementById(
+                "edit_section_subtitle"
+            ).value =
+                button.dataset.subtitle ||
+                "";
+
+
+            document.getElementById(
+                "edit_section_trainee_content"
+            ).value =
+                button.dataset.traineeContent ||
+                "";
+
+
+            document.getElementById(
+                "edit_section_fto_notes"
+            ).value =
+                button.dataset.ftoNotes ||
+                "";
+
+
+            document.getElementById(
+                "edit_section_type"
+            ).value =
+                button.dataset.sectionType ||
+                "content";
+
+
+            updateEditSectionType();
+
+
+            document.getElementById(
+                "edit_section_active"
+            ).value =
+                button.dataset.isActive ||
+                "1";
+
+
+            document.getElementById(
+                "editSectionForm"
+            ).action =
+                `/training/assessments/<%= assessment.id %>/sections/${button.dataset.id}/update`;
+
+
+            document
+                .getElementById(
+                    "editSectionModal"
+                )
+                .classList.add(
+                    "open"
+                );
+        }
+
+
+        function closeEditSection() {
+
+            document
+                .getElementById(
+                    "editSectionModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+        function getSectionTypeHelp(
+            type
+        ) {
+
+            switch (type) {
+
+                case "quiz":
+                    return "Quiz section — add any trainee instructions here, then create the actual quiz questions after saving the section.";
+
+                case "practical":
+                    return "Practical section — use FTO Notes for practical instructions and marking guidance. Add practical assessment items after saving.";
+
+                case "mixed":
+                    return "Mixed section — supports teaching content, quiz questions and practical assessment items together.";
+
+                case "content":
+                default:
+                    return "Content section — use Trainee Content for what trainees see and FTO Notes for private trainer guidance.";
+            }
+        }
+
+
+        function updateCreateSectionType() {
+
+            const type =
+                document.getElementById(
+                    "createSectionType"
+                ).value;
+
+
+            document.getElementById(
+                "createSectionTypeHelp"
+            ).textContent =
+                getSectionTypeHelp(type);
+        }
+
+
+        function updateEditSectionType() {
+
+            const type =
+                document.getElementById(
+                    "edit_section_type"
+                ).value;
+
+
+            document.getElementById(
+                "editSectionTypeHelp"
+            ).textContent =
+                getSectionTypeHelp(type);
+        }
+
+
+        function openCreateQuestion(
+            button
+        ) {
+
+            document.getElementById(
+                "questionSectionName"
+            ).textContent =
+                button.dataset.sectionName ||
+                "";
+
+
+            document.getElementById(
+                "createQuestionForm"
+            ).action =
+                `/training/assessments/<%= assessment.id %>/sections/${button.dataset.sectionId}/questions/create`;
+
+
+            document
+                .getElementById(
+                    "createQuestionModal"
+                )
+                .classList.add(
+                    "open"
+                );
+
+
+            updateQuestionType();
+        }
+
+
+        function closeCreateQuestion() {
+
+            document
+                .getElementById(
+                    "createQuestionModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+        function updateQuestionType() {
+
+            const type =
+                document.getElementById(
+                    "questionType"
+                ).value;
+
+
+            const multipleChoice =
+                document.getElementById(
+                    "multipleChoiceFields"
+                );
+
+
+            const yesNo =
+                document.getElementById(
+                    "yesNoFields"
+                );
+
+
+            const manual =
+                document.getElementById(
+                    "manualQuestionNotice"
+                );
+
+
+            multipleChoice.classList.toggle(
+                "builder-hidden",
+                type !==
+                "multiple_choice"
+            );
+
+
+            yesNo.classList.toggle(
+                "builder-hidden",
+                type !==
+                "yes_no"
+            );
+
+
+            manual.classList.toggle(
+                "builder-hidden",
+                ![
+                    "text",
+                    "practical"
+                ].includes(type)
+            );
+        }
+
+
+        updateCreateSectionType();
+
+
+        window.addEventListener(
+            "click",
+            event => {
+
+                const modals = [
+                    document.getElementById(
+                        "createSectionModal"
+                    ),
+
+                    document.getElementById(
+                        "editSectionModal"
+                    ),
+
+                    document.getElementById(
+                        "createQuestionModal"
+                    )
+                ];
+
+
+                for (
+                    const modal of modals
+                ) {
+
+                    if (
+                        event.target ===
+                        modal
+                    ) {
+
+                        modal.classList.remove(
+                            "open"
+                        );
+                    }
+                }
+            }
+        );
+
+
+        window.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeCreateSection();
+                    closeEditSection();
+                    closeCreateQuestion();
+                }
+            }
+        );
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        <%= session.assessment_name %> | Schedule
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+
+<body>
+
+    <header class="training-topbar">
+
+        <a
+            href="/training"
+            class="training-brand"
+        >
+
+            <div class="training-brand-logo">
+
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+
+            </div>
+
+            <div class="training-brand-text">
+
+                <strong>
+                    Hendry County
+                </strong>
+
+                <span>
+                    Interactive Training
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <nav class="training-nav">
+
+            <a href="/training">
+                Home
+            </a>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+                <a
+                    href="/training/schedule"
+                    class="active"
+                >
+                    Schedule
+                </a>
+
+            <% } %>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+                <a href="/training/fto-review">
+                    FTO Review
+                </a>
+
+            <% } %>
+
+            <a href="/training/results">
+                Results
+            </a>
+
+        </nav>
+
+
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Training Staff
+                </span>
+
+            </div>
+
+            <a
+                href="/logout"
+                class="training-logout"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main class="training-page schedule-page">
+
+        <a
+            href="/training/schedule"
+            class="builder-back-link"
+        >
+            ← Back to Schedule
+        </a>
+
+
+        <section class="schedule-detail-header">
+
+            <div>
+
+                <div class="training-eyebrow">
+                    <%= session.department_code %>
+                    ·
+                    TRAINING SESSION
+                </div>
+
+                <h1>
+                    <%= session.assessment_name %>
+                </h1>
+
+                <p>
+                    Hosted by
+                    <strong>
+                        <%= session.host_display_name || session.host_username %>
+                    </strong>
+                </p>
+
+            </div>
+
+
+            <span class="schedule-status large <%= session.status %>">
+                <%= session.status.toUpperCase() %>
+            </span>
+
+        </section>
+
+
+        <% if (message) { %>
+
+            <div class="training-alert success">
+                <%= message %>
+            </div>
+
+        <% } %>
+
+
+        <% if (error) { %>
+
+            <div class="training-alert error">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+
+        <section class="schedule-detail-stats">
+
+            <article>
+
+                <span>
+                    DATE & TIME
+                </span>
+
+                <strong>
+                    <%= session.scheduled_for
+                        ? new Date(session.scheduled_for).toLocaleString()
+                        : "TBC" %>
+                </strong>
+
+            </article>
+
+
+            <article>
+
+                <span>
+                    JOIN CODE
+                </span>
+
+                <strong class="schedule-join-code">
+                    <%= session.join_code %>
+                </strong>
+
+            </article>
+
+
+            <article>
+
+                <span>
+                    MAX TRAINEES
+                </span>
+
+                <strong>
+                    <%= session.max_trainees || "Unlimited" %>
+                </strong>
+
+            </article>
+
+
+            <article>
+
+                <span>
+                    DISCORD
+                </span>
+
+                <strong>
+                    <%= session.attendance_message_id
+                        ? "Posted"
+                        : "Not Posted" %>
+                </strong>
+
+            </article>
+
+        </section>
+
+
+        <% if (session.notes) { %>
+
+            <section class="schedule-notes">
+
+                <div class="training-eyebrow">
+                    SESSION NOTES
+                </div>
+
+                <p>
+                    <%= session.notes %>
+                </p>
+
+            </section>
+
+        <% } %>
+
+
+        <section class="schedule-actions">
+
+            <% if (session.status === "scheduled") { %>
+
+                <form
+                    method="POST"
+                    action="/training/schedule/<%= session.id %>/start"
+                >
+
+                    <button
+                        type="submit"
+                        class="schedule-action-button start"
+                        onclick="return confirm('Start this training session now?');"
+                    >
+                        ▶ Start Session
+                    </button>
+
+                </form>
+
+
+                <form
+                    method="POST"
+                    action="/training/schedule/<%= session.id %>/post-discord"
+                >
+
+                    <button
+                        type="submit"
+                        class="schedule-action-button discord"
+                    >
+                        Post Attendance to Discord
+                    </button>
+
+                </form>
+
+
+                <form
+                    method="POST"
+                    action="/training/schedule/<%= session.id %>/cancel"
+                >
+
+                    <button
+                        type="submit"
+                        class="schedule-action-button cancel"
+                        onclick="return confirm('Cancel this training session?');"
+                    >
+                        Cancel Session
+                    </button>
+
+                </form>
+
+            <% } %>
+
+
+            <% if (session.status === "live") { %>
+
+                <a
+                    href="/training/live/<%= session.id %>/fto"
+                    class="schedule-action-button start"
+                >
+                    🎓 Open Live FTO
+                </a>
+
+                <form
+                    method="POST"
+                    action="/training/live/<%= session.id %>/finalize"
+                    onsubmit="return confirm('Finish this session and create official results for all present trainees?');"
+                >
+
+                    <button
+                        type="submit"
+                        class="schedule-action-button complete"
+                    >
+                        ✓ Finish & Create Results
+                    </button>
+
+                </form>
+
+            <% } %>
+
+            <% if (session.status === "completed") { %>
+
+                <a
+                    href="/training/live/<%= session.id %>/summary"
+                    class="schedule-action-button complete"
+                >
+                    View Live Results
+                </a>
+
+            <% } %>
+
+        </section>
+
+
+        <% if (!publicUrlConfigured || !botTokenConfigured) { %>
+
+            <div class="schedule-config-warning">
+
+                <strong>
+                    Discord posting isn't fully configured yet.
+                </strong>
+
+                <span>
+
+                    <% if (!publicUrlConfigured) { %>
+
+                        Add
+                        <code>TRAINING_PUBLIC_URL</code>
+                        to your .env.
+
+                    <% } %>
+
+                    <% if (!botTokenConfigured) { %>
+
+                        Make sure this process can read your Discord bot token.
+
+                    <% } %>
+
+                </span>
+
+            </div>
+
+        <% } %>
+
+
+        <section class="schedule-attendance-section">
+
+            <div class="schedule-attendance-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        ATTENDANCE
+                    </div>
+
+                    <h2>
+                        Responses
+                    </h2>
+
+                </div>
+
+
+                <strong>
+                    <%= attendance.filter(person => person.attendance_status === "attending").length %>
+                    Attending
+                </strong>
+
+            </div>
+
+
+            <% if (!attendance.length) { %>
+
+                <div class="schedule-attendance-empty">
+                    Nobody has responded yet.
+                </div>
+
+            <% } else { %>
+
+                <div class="schedule-attendance-list">
+
+                    <% attendance.forEach(person => { %>
+
+                        <article class="schedule-attendance-person">
+
+                            <div class="schedule-attendance-profile">
+
+                                <img
+                                    src="<%= person.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+                                    alt="<%= person.display_name || person.username %>"
+                                >
+
+                                <div>
+
+                                    <strong>
+                                        <%= person.display_name || person.username %>
+                                    </strong>
+
+                                    <span>
+                                        <%= person.participant_role.toUpperCase() %>
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <span class="attendance-pill <%= person.attendance_status %>">
+                                <%= person.attendance_status.toUpperCase() %>
+                            </span>
+
+                        </article>
+
+                    <% }) %>
+
+                </div>
+
+            <% } %>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

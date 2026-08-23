@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Training | HCP Interactive Training</title>
+
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+    <header class="training-topbar">
+
+        <a href="/training" class="training-brand">
+            <div class="training-brand-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+            </div>
+
+            <div class="training-brand-text">
+                <strong>Hendry County</strong>
+                <span>Interactive Training</span>
+            </div>
+        </a>
+
+        <nav class="training-nav">
+            <a href="/training">Home</a>
+            <a href="/training/my-training" class="active">My Training</a>
+            <% if (permissions.isManagement) { %>
+
+                <a href="/training/departments">
+
+                    Departments
+
+                </a>
+
+            <% } %>
+            <% if (permissions.isManagement) { %>
+
+                <a href="/training/assessments">
+
+                    Assessments
+
+                </a>
+
+            <% } %>
+            <a href="/training/results">Results</a>
+        </nav>
+
+        <div class="training-user-box">
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+                <strong><%= user.displayName %></strong>
+                <span>Trainee Portal</span>
+            </div>
+
+            <a href="/logout" class="training-logout">
+                Logout
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="training-page trainee-training-page">
+
+        <section class="trainee-list-header">
+            <div>
+                <div class="training-eyebrow">
+                    TRAINEE PORTAL
+                </div>
+
+                <h1 class="trainee-list-title">
+                    My Training
+                </h1>
+
+                <p class="trainee-list-description">
+                    Select an available assessment to open its training content and questions.
+                </p>
+            </div>
+        </section>
+
+
+        <!-- ================================================== -->
+        <!-- UPCOMING / LIVE DEPARTMENT TRAINING -->
+        <!-- ================================================== -->
+
+        <section class="trainee-upcoming-section">
+            <div class="trainee-section-heading">
+                <div>
+                    <div class="training-eyebrow">DEPARTMENT SESSIONS</div>
+                    <h2>Upcoming Training</h2>
+                    <p>Only training sessions for your department are shown here.</p>
+                </div>
+                <a href="/training/live/join" class="trainee-code-link">Join with Code</a>
+            </div>
+
+            <% if (!upcomingSessions || !upcomingSessions.length) { %>
+                <div class="trainee-upcoming-empty">
+                    <strong>No upcoming sessions.</strong>
+                    <span>Your department has no scheduled or live training right now.</span>
+                </div>
+            <% } else { %>
+                <div class="trainee-upcoming-grid">
+                    <% upcomingSessions.forEach(session => { %>
+                        <article class="trainee-session-card <%= session.status === 'live' ? 'is-live' : '' %>">
+                            <div class="trainee-session-top">
+                                <div class="trainee-department-badge" data-accent-color="<%= session.department_color %>">
+                                    <%= session.department_code %>
+                                </div>
+                                <% if (session.status === 'live') { %>
+                                    <span class="trainee-live-badge"><span></span> LIVE NOW</span>
+                                <% } else { %>
+                                    <span class="trainee-scheduled-badge">UPCOMING</span>
+                                <% } %>
+                            </div>
+
+                            <div class="trainee-department-name"><%= session.department_name %></div>
+                            <h3><%= session.assessment_name %></h3>
+                            <p><%= session.assessment_description || 'Department training session.' %></p>
+
+                            <div class="trainee-session-details">
+                                <div>
+                                    <span>DATE & TIME</span>
+                                    <strong><%= session.scheduled_for ? new Date(session.scheduled_for).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'To be confirmed' %></strong>
+                                </div>
+                                <div>
+                                    <span>FTO / HOST</span>
+                                    <strong><%= session.host_display_name || session.host_username || 'Training Staff' %></strong>
+                                </div>
+                            </div>
+
+                            <% if (session.status === 'live') { %>
+                                <a href="/training/live/<%= session.id %>/trainee" class="trainee-live-join-button">
+                                    Join Live Training <span>→</span>
+                                </a>
+                            <% } else { %>
+                                <div class="trainee-waiting-button">
+                                    Waiting for FTO to Start
+                                </div>
+                            <% } %>
+                        </article>
+                    <% }) %>
+                </div>
+            <% } %>
+        </section>
+
+        <% if (!assessments.length) { %>
+
+            <section class="trainee-empty-state">
+                <div class="trainee-empty-icon">✓</div>
+
+                <h2>No training is available.</h2>
+
+                <p>
+                    There are currently no active assessments available to complete.
+                </p>
+            </section>
+
+        <% } else { %>
+
+            <section class="trainee-assessment-grid">
+
+                <% assessments.forEach(assessment => { %>
+
+                    <article class="trainee-assessment-card">
+
+                        <div class="trainee-assessment-card-top">
+                            <div
+                                class="trainee-department-badge"
+                                data-accent-color="<%= assessment.department_color %>"
+                            >
+                                <%= assessment.department_code %>
+                            </div>
+
+                            <span class="trainee-available-badge">
+                                AVAILABLE
+                            </span>
+                        </div>
+
+                        <div class="trainee-department-name">
+                            <%= assessment.department_name %>
+                        </div>
+
+                        <h2>
+                            <%= assessment.name %>
+                        </h2>
+
+                        <p>
+                            <%= assessment.description || "No assessment description has been added." %>
+                        </p>
+
+                        <div class="trainee-assessment-stats">
+                            <div>
+                                <span>Pass Mark</span>
+                                <strong><%= Number(assessment.pass_mark_percent).toFixed(0) %>%</strong>
+                            </div>
+
+                            <div>
+                                <span>Sections</span>
+                                <strong><%= assessment.section_count %></strong>
+                            </div>
+
+                            <div>
+                                <span>Questions</span>
+                                <strong><%= assessment.question_count %></strong>
+                            </div>
+
+                            <div>
+                                <span>Marks</span>
+                                <strong><%= Number(assessment.total_marks).toFixed(0) %></strong>
+                            </div>
+                        </div>
+
+                        <a
+                            href="/training/my-training/<%= assessment.id %>"
+                            class="trainee-start-button"
+                        >
+                            Start Training
+                            <span>→</span>
+                        </a>
+
+                    </article>
+
+                <% }) %>
+
+            </section>
+
+        <% } %>
+
+    </main>
+
+
+    <script>
+        document
+            .querySelectorAll(
+                ".trainee-department-badge[data-accent-color]"
+            )
+            .forEach(element => {
+                element.style.borderColor =
+                    element.dataset.accentColor || "#bfc2c7";
+            });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        System Check | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+
+<body>
+
+<header class="training-topbar">
+
+    <a
+        href="/training"
+        class="training-brand"
+    >
+        <div class="training-brand-logo">
+            <img
+                src="/public/images/HCPIT.png"
+                alt="HCP"
+            >
+        </div>
+
+        <div class="training-brand-text">
+            <strong>
+                Hendry County
+            </strong>
+
+            <span>
+                Interactive Training
+            </span>
+        </div>
+    </a>
+
+
+    <nav class="training-nav">
+        <a href="/training">
+            Home
+        </a>
+
+        <a href="/training/schedule">
+            Schedule
+        </a>
+
+        <a href="/training/fto-review">
+            FTO Review
+        </a>
+
+        <a
+            href="/training/system-check"
+            class="active"
+        >
+            System Check
+        </a>
+    </nav>
+
+
+    <div class="training-user-box">
+
+        <img
+            src="<%= user.avatar %>"
+            alt="<%= user.displayName %>"
+        >
+
+        <div class="training-user-info">
+            <strong>
+                <%= user.displayName %>
+            </strong>
+
+            <span>
+                Training Management
+            </span>
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="training-page system-check-page">
+
+    <div class="training-eyebrow">
+        RELEASE CHECK
+    </div>
+
+    <h1>
+        HCP Interactive Training v1
+    </h1>
+
+    <p class="system-check-subtitle">
+        Final operational check before putting the training system into normal use.
+    </p>
+
+
+    <section class="system-check-live">
+
+        <div>
+
+            <span>
+                SYSTEM STATUS
+            </span>
+
+            <strong id="systemHealthText">
+                Checking…
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                LIVE SESSIONS
+            </span>
+
+            <strong id="systemLiveCount">
+                —
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                PENDING REVIEWS
+            </span>
+
+            <strong id="systemPendingCount">
+                —
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <section class="system-check-grid">
+
+        <article>
+            <span class="system-check-number">
+                01
+            </span>
+
+            <h2>
+                Discord Login & Permissions
+            </h2>
+
+            <p>
+                Management, HCSO, CPD and FHP users only see the areas and departments
+                allowed by their Discord roles.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                02
+            </span>
+
+            <h2>
+                Assessments
+            </h2>
+
+            <p>
+                Sections, multiple-choice, Yes/No, written and practical questions
+                display and save correctly.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                03
+            </span>
+
+            <h2>
+                Scheduling & Attendance
+            </h2>
+
+            <p>
+                FTOs can schedule their own department and trainees only see sessions
+                belonging to their department.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                04
+            </span>
+
+            <h2>
+                Live Training
+            </h2>
+
+            <p>
+                Trainees follow the FTO section automatically and FTO-only notes remain
+                hidden from trainees.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                05
+            </span>
+
+            <h2>
+                Live Questions
+            </h2>
+
+            <p>
+                FTO controls question release, auto questions mark correctly and manual
+                items can be marked live.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                06
+            </span>
+
+            <h2>
+                Official Results
+            </h2>
+
+            <p>
+                Live sessions create official attempts with PASS, FAIL or Pending FTO
+                Review outcomes.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                07
+            </span>
+
+            <h2>
+                Discord Passed Roles
+            </h2>
+
+            <p>
+                PASS removes Needs Training and gives the correct department passed role.
+                FAIL and Pending do not change roles.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+
+        <article>
+            <span class="system-check-number">
+                08
+            </span>
+
+            <h2>
+                Multi-Trainee / Duplicate Safety
+            </h2>
+
+            <p>
+                Multiple trainees get separate results and repeated finalization does not
+                create duplicate official attempts.
+            </p>
+
+            <label>
+                <input type="checkbox">
+                Confirmed
+            </label>
+        </article>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    async function loadHealth() {
+
+        const healthText =
+            document.getElementById(
+                "systemHealthText"
+            );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/training/system/health"
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (
+                !result.ok
+            ) {
+
+                throw new Error(
+                    "Health check failed"
+                );
+            }
+
+
+            healthText.textContent =
+                "ONLINE";
+
+
+            healthText.classList.add(
+                "healthy"
+            );
+
+
+            document
+                .getElementById(
+                    "systemLiveCount"
+                )
+                .textContent =
+                result.liveSessions;
+
+
+            document
+                .getElementById(
+                    "systemPendingCount"
+                )
+                .textContent =
+                result.pendingReviews;
+
+
+        } catch {
+
+            healthText.textContent =
+                "CHECK FAILED";
+
+
+            healthText.classList.add(
+                "unhealthy"
+            );
+        }
+    }
+
+
+    loadHealth();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HCP Interactive Training</title>
+
+    <!-- TAB / BROWSER ICON -->
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <header class="training-topbar">
+
+        <!-- BRAND -->
+        <a href="/training" class="training-brand">
+
+            <div class="training-brand-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="Hendry County Interactive Training"
+                >
+            </div>
+
+            <div class="training-brand-text">
+                <strong>Hendry County</strong>
+                <span>Interactive Training</span>
+            </div>
+
+        </a>
+
+
+        <!-- NAVIGATION -->
+        <nav class="training-nav">
+
+            <a href="/training" class="active">
+                Home
+            </a>
+
+            <% if (permissions.isManagement || permissions.traineeDepartments.length > 0) { %>
+
+
+                <a href="/training/my-training">
+
+
+                    My Training
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+
+                <a href="/training/fto-review">
+
+
+                    FTO Review
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/departments">
+
+
+                    Departments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement) { %>
+
+
+                <a href="/training/assessments">
+
+
+                    Assessments
+
+
+                </a>
+
+
+            <% } %>
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+
+                <a href="/training/schedule">
+
+
+                    Schedule
+
+
+                </a>
+
+
+            <% } %>
+
+            <a href="/training/results">
+                Results
+            </a>
+
+            <% if (typeof isOwner !== "undefined" && isOwner) { %>
+
+                <a href="/training/owner">
+                    Owner
+                </a>
+
+            <% } %>
+
+        </nav>
+
+
+        <!-- ACCOUNT -->
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+                class="training-avatar"
+            >
+
+            <div class="training-user-info">
+                <strong><%= user.displayName %></strong>
+                <span>Account Connected</span>
+            </div>
+
+            <a href="/logout" class="training-logout">
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="training-page">
+
+
+        <!-- HERO -->
+        <section class="training-hero center">
+
+            <div class="training-eyebrow">
+                HENDRY COUNTY INTERACTIVE TRAINING
+            </div>
+
+            <h1 class="training-title">
+                Welcome back,
+                <span class="orange">
+                    <%= user.displayName %>
+                </span>
+            </h1>
+
+            <p class="training-subtitle">
+                Manage training sessions, assessments, departments and
+                results from the Hendry County Project Interactive Training platform.
+            </p>
+
+        </section>
+
+
+<!-- ================================================== -->
+<!-- STATS -->
+<!-- ================================================== -->
+
+<section class="training-stats">
+
+    <% if (permissions.isManagement) { %>
+
+<!-- DEPARTMENTS -->
+    <article class="training-stat-card">
+
+        <div class="training-stat-icon">
+            ◆
+        </div>
+
+        <div>
+
+            <div class="training-stat-label">
+                Departments
+            </div>
+
+            <div class="training-stat-value">
+                <%= stats.departments %>
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <!-- ASSESSMENTS -->
+    <article class="training-stat-card">
+
+        <div class="training-stat-icon">
+            ⚡
+        </div>
+
+        <div>
+
+            <div class="training-stat-label">
+                Assessments
+            </div>
+
+            <div class="training-stat-value">
+                <%= stats.assessments %>
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <% } %>
+
+<!-- LIVE SESSIONS -->
+    <article class="training-stat-card">
+
+        <div class="training-stat-icon">
+            ●
+        </div>
+
+        <div>
+
+            <div class="training-stat-label">
+                Live Sessions
+            </div>
+
+            <div class="training-stat-value">
+                <%= stats.liveSessions %>
+            </div>
+
+        </div>
+
+    </article>
+
+</section>
+
+        <!-- CONTROL CENTER -->
+        <section class="training-control-center">
+
+            <div class="training-eyebrow">
+                TRAINING CENTER
+            </div>
+
+            <h2 class="training-section-title">
+                Control your training.
+            </h2>
+
+            <p class="training-section-description">
+                Select an area of the Hendry County Project Interactive Training platform.
+            </p>
+
+
+            <div class="training-action-grid">
+
+                <% if (permissions.isManagement || permissions.traineeDepartments.length > 0) { %>
+<!-- MY TRAINING -->
+                <a
+                    href="/training/my-training"
+                    class="training-action-card"
+                >
+                    <div class="training-action-icon">
+                        ✓
+                    </div>
+
+                    <div class="training-action-content">
+                        <span class="training-action-small">
+                            TRAINEE
+                        </span>
+
+                        <span class="training-action-title">
+                            My Training
+                        </span>
+
+                        <span class="training-action-description">
+                            Open available training and work through assessment sections.
+                        </span>
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+                </a>
+<% } %>
+
+
+
+                <% if (permissions.isManagement) { %>
+<!-- DEPARTMENTS -->
+                <a
+                    href="/training/departments"
+                    class="training-action-card"
+                >
+
+                    <div class="training-action-icon">
+                        ◆
+                    </div>
+
+                    <div class="training-action-content">
+
+                        <span class="training-action-small">
+                            MANAGEMENT
+                        </span>
+
+                        <span class="training-action-title">
+                            Departments
+                        </span>
+
+                        <span class="training-action-description">
+                            Manage CPD, HCSO, FHP and other departments.
+                        </span>
+
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+
+                </a>
+<% } %>
+
+
+                <% if (permissions.isManagement) { %>
+<!-- ASSESSMENTS -->
+                <a
+                    href="/training/assessments"
+                    class="training-action-card"
+                >
+
+                    <div class="training-action-icon">
+                        ⚡
+                    </div>
+
+                    <div class="training-action-content">
+
+                        <span class="training-action-small">
+                            TRAINING
+                        </span>
+
+                        <span class="training-action-title">
+                            Assessments
+                        </span>
+
+                        <span class="training-action-description">
+                            Build training content, questions and practical tests.
+                        </span>
+
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+
+                </a>
+<% } %>
+
+
+                <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+<!-- SCHEDULE -->
+                <a
+                    href="/training/schedule"
+                    class="training-action-card"
+                >
+
+                    <div class="training-action-icon">
+                        ◷
+                    </div>
+
+                    <div class="training-action-content">
+
+                        <span class="training-action-small">
+                            ATTENDANCE
+                        </span>
+
+                        <span class="training-action-title">
+                            Schedule
+                        </span>
+
+                        <span class="training-action-description">
+                            Schedule training and manage attendance responses.
+                        </span>
+
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+
+                </a>
+<% } %>
+
+
+                <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+<!-- JOIN LIVE TRAINING --><a href="/training/live/join" class="training-action-card"><div class="training-action-icon">▶</div><div class="training-action-content"><span class="training-action-small">SESSION CODE</span><span class="training-action-title">Join Live Training</span><span class="training-action-description">Enter your FTO's 6-digit code and follow the session live.</span></div><span class="training-action-arrow">→</span></a>\n<!-- LIVE TRAINING -->
+                <a
+                    href="/training/live"
+                    class="training-action-card"
+                >
+
+                    <div class="training-action-icon">
+                        ●
+                    </div>
+
+                    <div class="training-action-content">
+
+                        <span class="training-action-small">
+                            FTO
+                        </span>
+
+                        <span class="training-action-title">
+                            Live Training
+                        </span>
+
+                        <span class="training-action-description">
+                            Host and manage live FTO-led sessions.
+                        </span>
+
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+
+                </a>
+<% } %>
+
+
+                <!-- RESULTS -->
+                <a
+                    href="/training/results"
+                    class="training-action-card"
+                >
+
+                    <div class="training-action-icon">
+                        ✓
+                    </div>
+
+                    <div class="training-action-content">
+
+                        <span class="training-action-small">
+                            RECORDS
+                        </span>
+
+                        <span class="training-action-title">
+                            Results
+                        </span>
+
+                        <span class="training-action-description">
+                            Review scores, pass/fail decisions and training history.
+                        </span>
+
+                    </div>
+
+                    <span class="training-action-arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

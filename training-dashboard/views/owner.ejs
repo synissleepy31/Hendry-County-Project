@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Owner | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+
+</head>
+
+
+<body>
+
+<header class="training-topbar">
+
+    <a
+        href="/training"
+        class="training-brand"
+    >
+
+        <div class="training-brand-logo">
+            <img
+                src="/public/images/HCPIT.png"
+                alt="HCP"
+            >
+        </div>
+
+        <div class="training-brand-text">
+            <strong>
+                Hendry County
+            </strong>
+
+            <span>
+                Interactive Training
+            </span>
+        </div>
+
+    </a>
+
+
+    <nav class="training-nav">
+
+        <a href="/training">
+            Home
+        </a>
+
+        <a href="/training/schedule">
+            Schedule
+        </a>
+
+        <a href="/training/fto-review">
+            FTO Review
+        </a>
+
+        <a href="/training/results">
+            Results
+        </a>
+
+        <a
+            href="/training/owner"
+            class="active"
+        >
+            Owner
+        </a>
+
+    </nav>
+
+
+    <div class="training-user-box">
+
+        <img
+            src="<%= user.avatar %>"
+            alt="<%= user.displayName %>"
+        >
+
+        <div class="training-user-info">
+            <strong>
+                <%= user.displayName %>
+            </strong>
+
+            <span>
+                Owner Control
+            </span>
+        </div>
+
+        <a
+            href="/logout"
+            class="training-logout"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</header>
+
+
+<main class="training-page owner-page">
+
+    <section class="owner-heading">
+
+        <div>
+
+            <div class="training-eyebrow">
+                OWNER CONTROL
+            </div>
+
+            <h1>
+                Schedule Cleanup
+            </h1>
+
+            <p>
+                Clear completed and cancelled sessions from the normal Schedule view
+                without deleting training results or assessment history.
+            </p>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="/training/owner/archive-finished"
+            onsubmit="return confirm('Clear ALL completed and cancelled sessions from the Schedule tab? Training results will be kept.');"
+        >
+            <button
+                type="submit"
+                class="owner-clear-all-button"
+            >
+                Clear All Finished
+            </button>
+        </form>
+
+    </section>
+
+
+    <% if (!ownerStrictMode) { %>
+
+        <div class="owner-info-banner">
+
+            <strong>
+                Owner role not configured yet.
+            </strong>
+
+            <span>
+                Training Management currently has Owner access.
+                Add TRAINING_OWNER_ROLE_ID to .env later if you want this tab restricted
+                to one dedicated Discord role.
+            </span>
+
+        </div>
+
+    <% } %>
+
+
+    <% if (message) { %>
+
+        <div class="training-alert success">
+            <%= message %>
+        </div>
+
+    <% } %>
+
+
+    <% if (error) { %>
+
+        <div class="training-alert error">
+            <%= error %>
+        </div>
+
+    <% } %>
+
+
+    <section class="owner-history-panel">
+
+        <div class="owner-history-title">
+
+            <div>
+                <div class="training-eyebrow">
+                    SCHEDULE HISTORY
+                </div>
+
+                <h2>
+                    Completed & Cancelled
+                </h2>
+            </div>
+
+            <strong>
+                <%= history.length %> records
+            </strong>
+
+        </div>
+
+
+        <% if (!history.length) { %>
+
+            <div class="results-empty">
+                <h2>
+                    Nothing to clear.
+                </h2>
+
+                <p>
+                    Completed and cancelled sessions will appear here.
+                </p>
+            </div>
+
+        <% } else { %>
+
+            <div class="owner-history-list">
+
+                <% history.forEach(session => { %>
+
+                    <article class="owner-history-row <%= session.is_archived ? 'archived' : '' %>">
+
+                        <div class="owner-history-main">
+
+                            <span>
+                                <%= session.department_code %>
+                                ·
+                                #<%= session.id %>
+                            </span>
+
+                            <strong>
+                                <%= session.assessment_name %>
+                            </strong>
+
+                            <small>
+                                Host:
+                                <%= session.host_display_name || session.host_username %>
+                            </small>
+
+                        </div>
+
+
+                        <div class="owner-history-meta">
+
+                            <span class="schedule-status <%= session.status %>">
+                                <%= session.status.toUpperCase() %>
+                            </span>
+
+                            <small>
+                                <%= new Date(
+                                    session.ended_at ||
+                                    session.scheduled_for ||
+                                    session.created_at
+                                ).toLocaleString(
+                                    "en-GB",
+                                    {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit"
+                                    }
+                                ) %>
+                            </small>
+
+                        </div>
+
+
+                        <div class="owner-history-actions">
+
+                            <% if (Number(session.is_archived) === 1) { %>
+
+                                <span class="owner-archived-pill">
+                                    CLEARED
+                                </span>
+
+                                <form
+                                    method="POST"
+                                    action="/training/owner/restore/<%= session.id %>"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="schedule-action-button discord"
+                                    >
+                                        Restore
+                                    </button>
+                                </form>
+
+                            <% } else { %>
+
+                                <form
+                                    method="POST"
+                                    action="/training/owner/archive/<%= session.id %>"
+                                    onsubmit="return confirm('Clear this session from Schedule? Its results will stay saved.');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="schedule-action-button cancel"
+                                    >
+                                        Clear
+                                    </button>
+                                </form>
+
+                            <% } %>
+
+                        </div>
+
+                    </article>
+
+                <% }) %>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+</main>
+
+</body>
+</html>

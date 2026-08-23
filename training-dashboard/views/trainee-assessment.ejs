@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= assessment.name %> | My Training</title>
+
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+    <header class="training-topbar trainee-topbar">
+
+        <a href="/training" class="training-brand">
+            <div class="training-brand-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+            </div>
+
+            <div class="training-brand-text">
+                <strong>Hendry County</strong>
+                <span>Interactive Training</span>
+            </div>
+        </a>
+
+        <div class="trainee-training-heading">
+            <span class="trainee-live-dot"></span>
+            <%= assessment.department_code %> · <%= assessment.name %>
+        </div>
+
+        <div class="training-user-box">
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+                <strong><%= user.displayName %></strong>
+                <span>Trainee</span>
+            </div>
+
+            <a
+                href="/training/my-training"
+                class="training-logout"
+            >
+                Leave
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="trainee-assessment-page">
+
+        <aside class="trainee-section-sidebar">
+
+            <div class="trainee-sidebar-title">
+                SECTIONS
+            </div>
+
+            <nav id="traineeSectionNav">
+                <% sections.forEach((section, index) => { %>
+                    <button
+                        type="button"
+                        class="trainee-section-nav-item <%= index === 0 ? 'active' : '' %>"
+                        data-section-index="<%= index %>"
+                        onclick="showTraineeSection(<%= index %>)"
+                    >
+                        <span class="trainee-nav-dot"></span>
+
+                        <span>
+                            <%= index + 1 %>. <%= section.title %>
+                        </span>
+                    </button>
+                <% }) %>
+            </nav>
+
+            <div class="trainee-sidebar-summary">
+                <span>PASS MARK</span>
+                <strong><%= Number(assessment.pass_mark_percent).toFixed(0) %>%</strong>
+
+                <span>TOTAL MARKS</span>
+                <strong><%= Number(totalMarks).toFixed(0) %></strong>
+            </div>
+
+        </aside>
+
+
+        <form
+            id="traineeAssessmentForm"
+            class="trainee-assessment-content"
+            method="POST"
+            action="/training/my-training/<%= assessment.id %>/submit"
+        >
+
+            <div class="trainee-assessment-mobile-header">
+                <a href="/training/my-training">
+                    ← My Training
+                </a>
+            </div>
+
+
+            <% if (error) { %>
+                <div class="training-alert error trainee-submit-error">
+                    <%= error %>
+                </div>
+            <% } %>
+
+
+            <% if (!sections.length) { %>
+
+                <section class="trainee-empty-state">
+                    <h2>This assessment has no active sections yet.</h2>
+                    <p>Please check back later.</p>
+                </section>
+
+            <% } %>
+
+
+            <% sections.forEach((section, sectionIndex) => { %>
+
+                <% const sectionQuestions = questionsBySection[section.id] || []; %>
+
+                <section
+                    class="trainee-section-screen <%= sectionIndex === 0 ? 'active' : '' %>"
+                    data-section-screen="<%= sectionIndex %>"
+                >
+
+                    <div class="trainee-section-header">
+                        <div class="training-eyebrow">
+                            SECTION <%= sectionIndex + 1 %> · <%= section.section_type.toUpperCase() %>
+                        </div>
+
+                        <h1>
+                            <%= section.title %>
+                        </h1>
+
+                        <% if (section.subtitle) { %>
+                            <p class="trainee-section-subtitle">
+                                <%= section.subtitle %>
+                            </p>
+                        <% } %>
+                    </div>
+
+
+                    <% if (section.trainee_content) { %>
+                        <article class="trainee-learning-content">
+                            <div class="trainee-content-label">
+                                TRAINING CONTENT
+                            </div>
+
+                            <div class="trainee-content-text">
+                                <%= section.trainee_content %>
+                            </div>
+                        </article>
+                    <% } %>
+
+
+                    <% if (sectionQuestions.length) { %>
+
+                        <article class="trainee-question-panel">
+
+                            <div class="trainee-question-panel-header">
+                                <div>
+                                    <span>KNOWLEDGE CHECK</span>
+                                    <h2>
+                                        <%= sectionQuestions.length %>
+                                        question<%= sectionQuestions.length === 1 ? '' : 's' %>
+                                    </h2>
+                                </div>
+
+                                <div class="trainee-question-marks">
+                                    <%= sectionQuestions.reduce((sum, question) => sum + Number(question.max_marks || 0), 0) %>
+                                    marks
+                                </div>
+                            </div>
+
+
+                            <div class="trainee-question-list">
+
+                                <% sectionQuestions.forEach((question, questionIndex) => { %>
+
+                                    <section class="trainee-question-item">
+
+                                        <div class="trainee-question-title">
+                                            <span>
+                                                <%= questionIndex + 1 %>.
+                                            </span>
+
+                                            <strong>
+                                                <%= question.question_text %>
+                                            </strong>
+                                        </div>
+
+
+                                        <% if (question.question_type === 'multiple_choice') { %>
+
+                                            <div class="trainee-answer-options">
+                                                <% question.options.forEach((option, optionIndex) => { %>
+                                                    <label>
+                                                        <input
+                                                            type="radio"
+                                                            name="question_<%= question.id %>"
+                                                            value="<%= optionIndex %>"
+                                                            <%= optionIndex === 0 ? 'required' : '' %>
+                                                        >
+                                                        <span><%= option %></span>
+                                                    </label>
+                                                <% }) %>
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <% if (question.question_type === 'yes_no') { %>
+
+                                            <div class="trainee-answer-options">
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="question_<%= question.id %>"
+                                                        value="yes"
+                                                        required
+                                                    >
+                                                    <span>Yes</span>
+                                                </label>
+
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="question_<%= question.id %>"
+                                                        value="no"
+                                                    >
+                                                    <span>No</span>
+                                                </label>
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <% if (question.question_type === 'text') { %>
+
+                                            <textarea
+                                                class="trainee-written-answer"
+                                                name="question_<%= question.id %>"
+                                                rows="5"
+                                                placeholder="Enter your answer..."
+                                                required
+                                            ></textarea>
+
+                                            <div class="trainee-manual-note">
+                                                This answer will be reviewed by an FTO.
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <% if (question.question_type === 'practical') { %>
+
+                                            <div class="trainee-practical-card">
+                                                <div>
+                                                    PRACTICAL ASSESSMENT
+                                                </div>
+
+                                                <p>
+                                                    Complete this task when instructed by your FTO.
+                                                    Your FTO will award up to
+                                                    <strong><%= Number(question.max_marks).toFixed(0) %></strong>
+                                                    marks after you submit.
+                                                </p>
+                                            </div>
+
+                                        <% } %>
+
+                                    </section>
+
+                                <% }) %>
+
+                            </div>
+
+                        </article>
+
+                    <% } %>
+
+
+                    <div class="trainee-section-controls">
+
+                        <% if (sectionIndex > 0) { %>
+                            <button
+                                type="button"
+                                class="trainee-secondary-button"
+                                onclick="showTraineeSection(<%= sectionIndex - 1 %>)"
+                            >
+                                ← Previous
+                            </button>
+                        <% } else { %>
+                            <span></span>
+                        <% } %>
+
+
+                        <% if (sectionIndex < sections.length - 1) { %>
+                            <button
+                                type="button"
+                                class="trainee-primary-button"
+                                onclick="showTraineeSection(<%= sectionIndex + 1 %>)"
+                            >
+                                Next Section →
+                            </button>
+                        <% } else { %>
+                            <button
+                                type="button"
+                                class="trainee-primary-button trainee-submit-preview"
+                                onclick="openSubmitConfirmation()"
+                            >
+                                Finish Assessment
+                            </button>
+                        <% } %>
+
+                    </div>
+
+                </section>
+
+            <% }) %>
+
+        </form>
+
+    </main>
+
+
+    <div
+        id="traineeSubmitModal"
+        class="training-modal-backdrop"
+    >
+        <div class="training-modal trainee-info-modal">
+            <div class="training-modal-header">
+                <div>
+                    <div class="training-eyebrow">
+                        SUBMIT ASSESSMENT
+                    </div>
+
+                    <h2>
+                        Ready to finish?
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeSubmitConfirmation()"
+                >
+                    ×
+                </button>
+            </div>
+
+            <p class="trainee-modal-text">
+                Your answers will be saved to MySQL. Multiple-choice and Yes/No questions
+                will be marked automatically. Written and practical items will be sent for
+                FTO review before your final result is confirmed.
+            </p>
+
+            <div class="trainee-submit-modal-actions">
+                <button
+                    type="button"
+                    class="trainee-secondary-button"
+                    onclick="closeSubmitConfirmation()"
+                >
+                    Keep Working
+                </button>
+
+                <button
+                    type="button"
+                    class="training-save-button trainee-final-submit-button"
+                    onclick="submitTraineeAssessment()"
+                >
+                    Submit Assessment
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function showTraineeSection(index) {
+            const screens =
+                document.querySelectorAll(
+                    ".trainee-section-screen"
+                );
+
+            const navItems =
+                document.querySelectorAll(
+                    ".trainee-section-nav-item"
+                );
+
+            screens.forEach(screen => {
+                screen.classList.remove("active");
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove("active");
+            });
+
+            const targetScreen =
+                document.querySelector(
+                    `[data-section-screen="${index}"]`
+                );
+
+            const targetNav =
+                document.querySelector(
+                    `[data-section-index="${index}"]`
+                );
+
+            if (targetScreen) {
+                targetScreen.classList.add("active");
+            }
+
+            if (targetNav) {
+                targetNav.classList.add("active");
+            }
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+
+        function openSubmitConfirmation() {
+            document
+                .getElementById(
+                    "traineeSubmitModal"
+                )
+                .classList.add(
+                    "open"
+                );
+        }
+
+
+        function closeSubmitConfirmation() {
+            document
+                .getElementById(
+                    "traineeSubmitModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+        function submitTraineeAssessment() {
+            const form =
+                document.getElementById(
+                    "traineeAssessmentForm"
+                );
+
+            const button =
+                document.querySelector(
+                    ".trainee-final-submit-button"
+                );
+
+            if (!form.checkValidity()) {
+                closeSubmitConfirmation();
+
+                const invalidField =
+                    form.querySelector(
+                        ":invalid"
+                    );
+
+                if (invalidField) {
+                    const screen =
+                        invalidField.closest(
+                            ".trainee-section-screen"
+                        );
+
+                    if (screen) {
+                        const screens =
+                            Array.from(
+                                document.querySelectorAll(
+                                    ".trainee-section-screen"
+                                )
+                            );
+
+                        const index =
+                            screens.indexOf(screen);
+
+                        if (index >= 0) {
+                            showTraineeSection(index);
+                        }
+                    }
+                }
+
+                form.reportValidity();
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent =
+                "Submitting...";
+
+            form.requestSubmit();
+        }
+
+
+        window.addEventListener(
+            "click",
+            event => {
+                const modal =
+                    document.getElementById(
+                        "traineeSubmitModal"
+                    );
+
+                if (event.target === modal) {
+                    closeSubmitConfirmation();
+                }
+            }
+        );
+
+
+        window.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Escape") {
+                    closeSubmitConfirmation();
+                }
+            }
+        );
+    </script>
+
+</body>
+</html>

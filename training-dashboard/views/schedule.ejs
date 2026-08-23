@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Schedule | HCP Interactive Training
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+</head>
+
+
+<body>
+
+    <header class="training-topbar">
+
+        <a
+            href="/training"
+            class="training-brand"
+        >
+
+            <div class="training-brand-logo">
+
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+
+            </div>
+
+            <div class="training-brand-text">
+
+                <strong>
+                    Hendry County
+                </strong>
+
+                <span>
+                    Interactive Training
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <nav class="training-nav">
+
+            <a href="/training">
+                Home
+            </a>
+
+            <% if (permissions.isManagement || permissions.traineeDepartments.length > 0) { %>
+
+                <a href="/training/my-training">
+                    My Training
+                </a>
+
+            <% } %>
+
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+                <a href="/training/fto-review">
+                    FTO Review
+                </a>
+
+            <% } %>
+
+
+            <% if (permissions.isManagement) { %>
+
+                <a href="/training/departments">
+                    Departments
+                </a>
+
+                <a href="/training/assessments">
+                    Assessments
+                </a>
+
+            <% } %>
+
+
+            <a
+                href="/training/schedule"
+                class="active"
+            >
+                Schedule
+            </a>
+
+
+            <a href="/training/results">
+                Results
+            </a>
+
+        </nav>
+
+
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Training Staff
+                </span>
+
+            </div>
+
+            <a
+                href="/logout"
+                class="training-logout"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main class="training-page schedule-page">
+
+        <section class="schedule-header">
+
+            <div>
+
+                <div class="training-eyebrow">
+                    SCHEDULING & ATTENDANCE
+                </div>
+
+                <h1>
+                    Training Schedule
+                </h1>
+
+                <p>
+                    Schedule department training, collect attendance,
+                    post sessions to Discord and manage upcoming sessions.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="assessment-create-button"
+                onclick="openScheduleModal()"
+            >
+                + Schedule Training
+            </button>
+
+        </section>
+
+
+        <% if (message) { %>
+
+            <div class="training-alert success">
+                <%= message %>
+            </div>
+
+        <% } %>
+
+
+        <% if (error) { %>
+
+            <div class="training-alert error">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+
+        <% if (!publicUrlConfigured || !botTokenConfigured) { %>
+
+            <div class="schedule-config-warning">
+
+                <strong>
+                    Discord attendance setup
+                </strong>
+
+                <span>
+
+                    <% if (!publicUrlConfigured) { %>
+
+                        Add
+                        <code>TRAINING_PUBLIC_URL</code>
+                        to your .env before posting attendance to Discord.
+
+                    <% } %>
+
+                    <% if (!botTokenConfigured) { %>
+
+                        The training server also needs access to your
+                        bot token through
+                        <code>DISCORD_TOKEN</code>,
+                        <code>BOT_TOKEN</code>
+                        or
+                        <code>TOKEN</code>.
+
+                    <% } %>
+
+                </span>
+
+            </div>
+
+        <% } %>
+
+
+        <section class="schedule-session-grid">
+
+            <% if (!sessions.length) { %>
+
+                <div class="schedule-empty">
+
+                    <div class="schedule-empty-icon">
+                        ◷
+                    </div>
+
+                    <h2>
+                        Nothing scheduled yet.
+                    </h2>
+
+                    <p>
+                        Create your first department training session.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="assessment-create-button"
+                        onclick="openScheduleModal()"
+                    >
+                        + Schedule Training
+                    </button>
+
+                </div>
+
+            <% } else { %>
+
+                <% sessions.forEach(session => { %>
+
+                    <a
+                        href="/training/schedule/<%= session.id %>"
+                        class="schedule-session-card <%= session.status %>"
+                    >
+
+                        <div class="schedule-card-top">
+
+                            <div>
+
+                                <div class="schedule-department">
+                                    <%= session.department_code %>
+                                </div>
+
+                                <h2>
+                                    <%= session.assessment_name %>
+                                </h2>
+
+                            </div>
+
+
+                            <span class="schedule-status <%= session.status %>">
+                                <%= session.status.toUpperCase() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="schedule-date">
+
+                            <span>
+                                SCHEDULED FOR
+                            </span>
+
+                            <strong>
+                                <%= session.scheduled_for
+                                    ? new Date(session.scheduled_for).toLocaleString()
+                                    : "TBC" %>
+                            </strong>
+
+                        </div>
+
+
+                        <div class="schedule-card-stats">
+
+                            <div>
+
+                                <span>
+                                    Attending
+                                </span>
+
+                                <strong>
+                                    <%= session.attending_count %>
+                                    <%= session.max_trainees
+                                        ? ` / ${session.max_trainees}`
+                                        : "" %>
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Maybe
+                                </span>
+
+                                <strong>
+                                    <%= session.maybe_count %>
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Unavailable
+                                </span>
+
+                                <strong>
+                                    <%= session.unavailable_count %>
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="schedule-card-footer">
+
+                            <span>
+                                Host:
+                                <strong>
+                                    <%= session.host_display_name || session.host_username %>
+                                </strong>
+                            </span>
+
+                            <span>
+                                Code:
+                                <strong>
+                                    <%= session.join_code %>
+                                </strong>
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                <% }) %>
+
+            <% } %>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================================================== -->
+    <!-- CREATE SCHEDULE MODAL -->
+    <!-- ================================================== -->
+
+    <div
+        id="scheduleModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal schedule-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        NEW TRAINING
+                    </div>
+
+                    <h2>
+                        Schedule Training
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeScheduleModal()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="/training/schedule/create"
+            >
+
+                <div class="training-form-grid">
+
+                    <div class="training-field">
+
+                        <label>
+                            Department
+                        </label>
+
+                        <select
+                            id="scheduleDepartment"
+                            name="department_id"
+                            onchange="filterScheduleAssessments()"
+                            required
+                        >
+
+                            <option value="">
+                                Select department...
+                            </option>
+
+                            <% departments.forEach(department => { %>
+
+                                <option
+                                    value="<%= department.id %>"
+                                >
+                                    <%= department.short_code %>
+                                    —
+                                    <%= department.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Assessment / Course
+                        </label>
+
+                        <select
+                            id="scheduleAssessment"
+                            name="assessment_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select assessment...
+                            </option>
+
+                            <% assessments.forEach(assessment => { %>
+
+                                <option
+                                    value="<%= assessment.id %>"
+                                    data-department-id="<%= assessment.department_id %>"
+                                >
+                                    <%= assessment.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Date & Time
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            name="scheduled_for"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="training-field">
+
+                        <label>
+                            Maximum Trainees
+                        </label>
+
+                        <input
+                            type="number"
+                            name="max_trainees"
+                            min="1"
+                            max="500"
+                            placeholder="Leave blank for unlimited"
+                        >
+
+                    </div>
+
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Session Notes
+                        </label>
+
+                        <textarea
+                            name="notes"
+                            rows="4"
+                            placeholder="Optional notes for the training session..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <label class="schedule-checkbox training-field-full">
+
+                        <input
+                            type="checkbox"
+                            name="post_to_discord"
+                            value="1"
+                        >
+
+                        <span>
+                            Post attendance embed to the department's
+                            configured Discord scheduling channel
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+                    Schedule Training
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function openScheduleModal() {
+
+            document
+                .getElementById(
+                    "scheduleModal"
+                )
+                .classList.add(
+                    "open"
+                );
+        }
+
+
+        function closeScheduleModal() {
+
+            document
+                .getElementById(
+                    "scheduleModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+        }
+
+
+        function filterScheduleAssessments() {
+
+            const departmentId =
+                document
+                    .getElementById(
+                        "scheduleDepartment"
+                    )
+                    .value;
+
+
+            const assessmentSelect =
+                document.getElementById(
+                    "scheduleAssessment"
+                );
+
+
+            assessmentSelect.value =
+                "";
+
+
+            Array.from(
+                assessmentSelect.options
+            ).forEach(
+                option => {
+
+                    if (!option.value) {
+
+                        option.hidden =
+                            false;
+
+                        return;
+                    }
+
+
+                    option.hidden =
+                        option.dataset.departmentId !==
+                        departmentId;
+                }
+            );
+        }
+
+
+        window.addEventListener(
+            "click",
+            event => {
+
+                const modal =
+                    document.getElementById(
+                        "scheduleModal"
+                    );
+
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    closeScheduleModal();
+                }
+            }
+        );
+
+
+        window.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeScheduleModal();
+                }
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

@@ -15,6 +15,7 @@
     "express-session": "^1.19.0",
     "lavalink-client": "^2.11.0",
     "mediaplex": "^1.0.0",
+    "mysql2": "^3.23.4",
     "sharp": "^0.35.3",
     "svg-captcha": "^1.4.0"
   }

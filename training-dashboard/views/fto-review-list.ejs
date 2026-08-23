@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTO Review | HCP Interactive Training</title>
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+<header class="training-topbar">
+
+    <a href="/training" class="training-brand">
+        <div class="training-brand-logo">
+            <img src="/public/images/HCPIT.png" alt="HCP Interactive Training">
+        </div>
+
+        <div class="training-brand-text">
+            <strong>Hendry County</strong>
+            <span>Interactive Training</span>
+        </div>
+    </a>
+
+    <nav class="training-nav">
+        <a href="/training">Home</a>
+        <% if (permissions.isManagement || permissions.traineeDepartments.length > 0) { %>
+
+            <a href="/training/my-training">
+
+                My Training
+
+            </a>
+
+        <% } %>
+        <% if (permissions.isManagement) { %>
+
+            <a href="/training/assessments">
+
+                Assessments
+
+            </a>
+
+        <% } %>
+        <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+            <a href="/training/fto-review" class="active">
+
+                FTO Review
+
+            </a>
+
+        <% } %>
+        <a href="/training/results">Results</a>
+    </nav>
+
+    <div class="training-user-box">
+        <img src="<%= user.avatar %>" alt="<%= user.displayName %>">
+
+        <div class="training-user-info">
+            <strong><%= user.displayName %></strong>
+            <span>FTO Review</span>
+        </div>
+
+        <a href="/logout" class="training-logout">
+            Logout
+        </a>
+    </div>
+
+</header>
+
+
+<main class="training-page fto-review-page">
+
+    <section class="fto-review-header">
+
+        <div>
+            <div class="training-eyebrow">
+                FTO MARKING
+            </div>
+
+            <h1>
+                Review Queue
+            </h1>
+
+            <p>
+                Review written and practical assessment items,
+                award marks and confirm each trainee's final result.
+            </p>
+        </div>
+
+        <div class="fto-review-count">
+            <span>WAITING</span>
+            <strong><%= pendingAttempts.length %></strong>
+        </div>
+
+    </section>
+
+
+    <% if (message) { %>
+        <div class="training-alert success">
+            <%= message %>
+        </div>
+    <% } %>
+
+    <% if (error) { %>
+        <div class="training-alert error">
+            <%= error %>
+        </div>
+    <% } %>
+
+
+    <section class="fto-review-section">
+
+        <div class="fto-review-section-title">
+            <div>
+                <div class="training-eyebrow">
+                    PENDING
+                </div>
+
+                <h2>
+                    Awaiting FTO Review
+                </h2>
+            </div>
+        </div>
+
+
+        <% if (!pendingAttempts.length) { %>
+
+            <div class="fto-review-empty">
+                <div class="fto-review-empty-icon">
+                    ✓
+                </div>
+
+                <h3>
+                    You're all caught up.
+                </h3>
+
+                <p>
+                    There are currently no trainee submissions waiting for manual marking.
+                </p>
+            </div>
+
+        <% } else { %>
+
+            <div class="fto-review-grid">
+
+                <% pendingAttempts.forEach(attempt => { %>
+
+                    <article class="fto-review-card pending">
+
+                        <div class="fto-review-card-top">
+
+                            <div>
+                                <div class="fto-review-department">
+                                    <%= attempt.department_code %>
+                                </div>
+
+                                <h3>
+                                    <%= attempt.assessment_name %>
+                                </h3>
+                            </div>
+
+                            <span class="fto-review-status pending">
+                                PENDING
+                            </span>
+
+                        </div>
+
+                        <div class="fto-review-trainee">
+                            <span>TRAINEE</span>
+                            <strong>
+                                <%= attempt.trainee_username %>
+                            </strong>
+                        </div>
+
+                        <div class="fto-review-card-stats">
+
+                            <div>
+                                <span>
+                                    Auto Marks
+                                </span>
+
+                                <strong>
+                                    <%= Number(attempt.auto_marks).toFixed(0) %>
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Manual Items
+                                </span>
+
+                                <strong>
+                                    <%= attempt.manual_question_count %>
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Pass Mark
+                                </span>
+
+                                <strong>
+                                    <%= Number(attempt.pass_mark_percent).toFixed(0) %>%
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <a
+                            href="/training/fto-review/<%= attempt.id %>"
+                            class="fto-review-open-button"
+                        >
+                            Open Submission
+                            <span>→</span>
+                        </a>
+
+                        <div class="fto-review-time">
+                            Submitted
+                            <%= new Date(attempt.submitted_at).toLocaleString() %>
+                        </div>
+
+                    </article>
+
+                <% }) %>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+
+    <section class="fto-review-section">
+
+        <div class="fto-review-section-title">
+            <div>
+                <div class="training-eyebrow">
+                    HISTORY
+                </div>
+
+                <h2>
+                    Recently Completed
+                </h2>
+            </div>
+        </div>
+
+
+        <% if (!recentCompleted.length) { %>
+
+            <div class="fto-review-empty compact">
+                No reviewed attempts yet.
+            </div>
+
+        <% } else { %>
+
+            <div class="fto-completed-list">
+
+                <% recentCompleted.forEach(attempt => { %>
+
+                    <a
+                        href="/training/fto-review/<%= attempt.id %>"
+                        class="fto-completed-row"
+                    >
+
+                        <div>
+                            <strong>
+                                <%= attempt.trainee_username %>
+                            </strong>
+
+                            <span>
+                                <%= attempt.department_code %>
+                                ·
+                                <%= attempt.assessment_name %>
+                            </span>
+                        </div>
+
+                        <div class="fto-completed-score">
+                            <strong>
+                                <%= Number(attempt.percentage || 0).toFixed(2) %>%
+                            </strong>
+
+                            <span class="<%= attempt.final_outcome === 'pass' ? 'pass' : 'fail' %>">
+                                <%= String(attempt.final_outcome).toUpperCase() %>
+                            </span>
+                        </div>
+
+                    </a>
+
+                <% }) %>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+</main>
+
+</body>
+</html>

@@ -7,6 +7,8 @@ import {
     saveDashboardPermissions
 } from "./services/dashboardPermissions.js";
 
+import "./training-dashboard/server.js";
+
 
 // your other imports below
 

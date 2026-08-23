@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Assessments | HCP Interactive Training
+    </title>
+
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/public/images/HCPIT.png"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="/public/css/training.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================================== -->
+    <!-- TOP BAR -->
+    <!-- ================================================== -->
+
+    <header class="training-topbar">
+
+
+        <!-- BRAND -->
+
+        <a
+            href="/training"
+            class="training-brand"
+        >
+
+            <div class="training-brand-logo">
+
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+
+            </div>
+
+
+            <div class="training-brand-text">
+
+                <strong>
+                    Hendry County
+                </strong>
+
+                <span>
+                    Interactive Training
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <!-- NAV -->
+
+        <nav class="training-nav">
+
+            <a href="/training">
+                Home
+            </a>
+
+
+            <% if (permissions.isManagement) { %>
+
+
+
+                <a href="/training/departments">
+
+
+
+                    Departments
+
+
+
+                </a>
+
+
+
+            <% } %>
+
+
+            <% if (permissions.isManagement) { %>
+
+
+
+                <a href="/training/assessments"
+                class="active"
+            >
+
+
+
+                    Assessments
+
+
+
+                </a>
+
+
+
+            <% } %>
+
+
+            <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+
+
+                <a href="/training/schedule">
+
+
+
+                    Schedule
+
+
+
+                </a>
+
+
+
+            <% } %>
+
+
+            <a href="/training/results">
+                Results
+            </a>
+
+        </nav>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="training-user-box">
+
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+
+            <div class="training-user-info">
+
+                <strong>
+                    <%= user.displayName %>
+                </strong>
+
+                <span>
+                    Account Connected
+                </span>
+
+            </div>
+
+
+            <a
+                href="/logout"
+                class="training-logout"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================================================== -->
+    <!-- PAGE -->
+    <!-- ================================================== -->
+
+    <main class="training-page">
+
+
+        <!-- PAGE HEADER -->
+
+        <section class="assessment-page-header">
+
+            <div>
+
+                <div class="training-eyebrow">
+                    TRAINING CONTENT
+                </div>
+
+
+                <h1 class="assessment-page-title">
+                    Assessments
+                </h1>
+
+
+                <p class="assessment-page-description">
+                    Build and manage training courses,
+                    assessments and practical evaluations.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="assessment-create-button"
+                onclick="openCreateAssessment()"
+            >
+                + New Assessment
+            </button>
+
+        </section>
+
+
+        <!-- ================================================== -->
+        <!-- MESSAGES -->
+        <!-- ================================================== -->
+
+        <% if (message) { %>
+
+            <div class="training-alert success">
+                <%= message %>
+            </div>
+
+        <% } %>
+
+
+        <% if (error) { %>
+
+            <div class="training-alert error">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+
+        <!-- ================================================== -->
+        <!-- NO DEPARTMENTS -->
+        <!-- ================================================== -->
+
+        <% if (!departments.length) { %>
+
+            <section class="assessment-empty">
+
+                <div class="assessment-empty-icon">
+                    !
+                </div>
+
+
+                <h2>
+                    Create a Department First
+                </h2>
+
+
+                <p>
+                    Assessments belong to departments.
+                    Create at least one active department
+                    before creating an assessment.
+                </p>
+
+
+                <a
+                    href="/training/departments"
+                    class="assessment-primary-link"
+                >
+                    Go to Departments
+                </a>
+
+            </section>
+
+
+        <% } else if (!assessments.length) { %>
+
+
+            <!-- ================================================== -->
+            <!-- NO ASSESSMENTS -->
+            <!-- ================================================== -->
+
+            <section class="assessment-empty">
+
+                <div class="assessment-empty-icon">
+                    ⚡
+                </div>
+
+
+                <h2>
+                    No Assessments Yet
+                </h2>
+
+
+                <p>
+                    Create your first assessment and
+                    start adding sections, teaching
+                    content and questions.
+                </p>
+
+
+                <button
+                    type="button"
+                    class="assessment-create-button"
+                    onclick="openCreateAssessment()"
+                >
+                    + Create Assessment
+                </button>
+
+            </section>
+
+
+        <% } else { %>
+
+
+            <!-- ================================================== -->
+            <!-- ASSESSMENT GRID -->
+            <!-- ================================================== -->
+
+            <section class="assessment-grid">
+
+                <% assessments.forEach(assessment => { %>
+
+                    <article class="assessment-card">
+
+
+                        <!-- TOP -->
+
+                        <div class="assessment-card-top">
+
+                            <div
+                                class="assessment-department-mark"
+                                data-accent-color="<%= assessment.department_color %>"
+                            >
+
+                                <span>
+                                    <%= assessment.department_code %>
+                                </span>
+
+                            </div>
+
+
+                            <% if (assessment.is_active) { %>
+
+                                <span class="department-status-active">
+                                    Active
+                                </span>
+
+                            <% } else { %>
+
+                                <span class="department-status-inactive">
+                                    Disabled
+                                </span>
+
+                            <% } %>
+
+                        </div>
+
+
+                        <!-- DEPARTMENT -->
+
+                        <div class="assessment-department-name">
+
+                            <%= assessment.department_name %>
+
+                        </div>
+
+
+                        <!-- TITLE -->
+
+                        <h2>
+
+                            <%= assessment.name %>
+
+                        </h2>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <p class="assessment-description">
+
+                            <%= assessment.description || "No assessment description has been added yet." %>
+
+                        </p>
+
+
+                        <!-- STATS -->
+
+                        <div class="assessment-card-stats">
+
+
+                            <div>
+
+                                <span>
+                                    Pass Mark
+                                </span>
+
+                                <strong>
+                                    <%= Number(assessment.pass_mark_percent).toFixed(0) %>%
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Sections
+                                </span>
+
+                                <strong>
+                                    <%= assessment.section_count %>
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Questions
+                                </span>
+
+                                <strong>
+                                    <%= assessment.question_count %>
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BUILDER BUTTON -->
+
+                        <a
+                            href="/training/assessments/<%= assessment.id %>"
+                            class="assessment-builder-button"
+                        >
+
+                            Open Assessment Builder
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+
+                        <!-- EDIT / DELETE -->
+
+                        <div class="assessment-secondary-actions">
+
+                            <button
+                                type="button"
+                                class="department-edit-button"
+
+                                data-id="<%= assessment.id %>"
+
+                                data-department-id="<%= assessment.department_id %>"
+
+                                data-name="<%= assessment.name %>"
+
+                                data-description="<%= assessment.description || '' %>"
+
+                                data-pass-mark="<%= assessment.pass_mark_percent %>"
+
+                                data-is-active="<%= assessment.is_active ? '1' : '0' %>"
+
+                                onclick="openEditAssessment(this)"
+                            >
+
+                                Edit Assessment
+
+                            </button>
+
+
+                            <form
+                                method="POST"
+                                action="/training/assessments/<%= assessment.id %>/delete"
+
+                                onsubmit="return confirm('Delete this assessment and all of its sections/questions? This cannot be undone.');"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="department-delete-button"
+                                >
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </article>
+
+                <% }) %>
+
+            </section>
+
+        <% } %>
+
+    </main>
+
+
+    <!-- ================================================== -->
+    <!-- CREATE ASSESSMENT MODAL -->
+    <!-- ================================================== -->
+
+    <div
+        id="createAssessmentModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        NEW ASSESSMENT
+                    </div>
+
+                    <h2>
+                        Create Assessment
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeCreateAssessment()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="/training/assessments/create"
+            >
+
+
+                <div class="training-form-grid">
+
+
+                    <!-- DEPARTMENT -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Department
+                        </label>
+
+
+                        <select
+                            name="department_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select a department...
+                            </option>
+
+
+                            <% departments.forEach(department => { %>
+
+                                <option value="<%= department.id %>">
+
+                                    <%= department.short_code %>
+                                    —
+                                    <%= department.name %>
+
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- NAME -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Assessment Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Basic Training"
+                            maxlength="180"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            name="description"
+                            rows="4"
+                            placeholder="Describe this training assessment..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- PASS MARK -->
+
+                    <div class="training-field">
+
+                        <label>
+                            Pass Mark %
+                        </label>
+
+                        <input
+                            type="number"
+                            name="pass_mark_percent"
+                            value="70"
+                            min="0"
+                            max="100"
+                            step="1"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+
+                    Create Assessment
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- EDIT ASSESSMENT MODAL -->
+    <!-- ================================================== -->
+
+    <div
+        id="editAssessmentModal"
+        class="training-modal-backdrop"
+    >
+
+        <div class="training-modal">
+
+            <div class="training-modal-header">
+
+                <div>
+
+                    <div class="training-eyebrow">
+                        ASSESSMENT SETTINGS
+                    </div>
+
+                    <h2>
+                        Edit Assessment
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="training-modal-close"
+                    onclick="closeEditAssessment()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="editAssessmentForm"
+                method="POST"
+            >
+
+
+                <div class="training-form-grid">
+
+
+                    <!-- DEPARTMENT -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Department
+                        </label>
+
+
+                        <select
+                            id="edit_assessment_department"
+                            name="department_id"
+                            required
+                        >
+
+                            <% departments.forEach(department => { %>
+
+                                <option value="<%= department.id %>">
+
+                                    <%= department.short_code %>
+                                    —
+                                    <%= department.name %>
+
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- NAME -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Assessment Name
+                        </label>
+
+                        <input
+                            id="edit_assessment_name"
+                            type="text"
+                            name="name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="training-field training-field-full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            id="edit_assessment_description"
+                            name="description"
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- PASS MARK -->
+
+                    <div class="training-field">
+
+                        <label>
+                            Pass Mark %
+                        </label>
+
+                        <input
+                            id="edit_assessment_pass_mark"
+                            type="number"
+                            name="pass_mark_percent"
+                            min="0"
+                            max="100"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="training-field">
+
+                        <label>
+                            Status
+                        </label>
+
+
+                        <select
+                            id="edit_assessment_active"
+                            name="is_active"
+                        >
+
+                            <option value="1">
+                                Active
+                            </option>
+
+                            <option value="0">
+                                Disabled
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="training-save-button"
+                >
+
+                    Save Assessment
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ================================================== -->
+
+    <script>
+
+
+        // ==================================================
+        // CREATE MODAL
+        // ==================================================
+
+        function openCreateAssessment() {
+
+            document
+                .getElementById(
+                    "createAssessmentModal"
+                )
+                .classList.add(
+                    "open"
+                );
+
+        }
+
+
+        function closeCreateAssessment() {
+
+            document
+                .getElementById(
+                    "createAssessmentModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+
+        }
+
+
+        // ==================================================
+        // EDIT MODAL
+        // ==================================================
+
+        function openEditAssessment(
+            button
+        ) {
+
+            document.getElementById(
+                "edit_assessment_department"
+            ).value =
+                button.dataset.departmentId;
+
+
+            document.getElementById(
+                "edit_assessment_name"
+            ).value =
+                button.dataset.name ||
+                "";
+
+
+            document.getElementById(
+                "edit_assessment_description"
+            ).value =
+                button.dataset.description ||
+                "";
+
+
+            document.getElementById(
+                "edit_assessment_pass_mark"
+            ).value =
+                button.dataset.passMark ||
+                "70";
+
+
+            document.getElementById(
+                "edit_assessment_active"
+            ).value =
+                button.dataset.isActive ||
+                "1";
+
+
+            document.getElementById(
+                "editAssessmentForm"
+            ).action =
+                `/training/assessments/${button.dataset.id}/update`;
+
+
+            document
+                .getElementById(
+                    "editAssessmentModal"
+                )
+                .classList.add(
+                    "open"
+                );
+
+        }
+
+
+        function closeEditAssessment() {
+
+            document
+                .getElementById(
+                    "editAssessmentModal"
+                )
+                .classList.remove(
+                    "open"
+                );
+
+        }
+
+
+        // ==================================================
+        // DEPARTMENT COLOURS
+        // ==================================================
+
+        document
+            .querySelectorAll(
+                ".assessment-department-mark[data-accent-color]"
+            )
+            .forEach(
+                element => {
+
+                    element.style.borderColor =
+                        element.dataset.accentColor ||
+                        "#bfc2c7";
+
+                }
+            );
+
+
+        // ==================================================
+        // CLICK OUTSIDE
+        // ==================================================
+
+        window.addEventListener(
+            "click",
+            event => {
+
+                const createModal =
+                    document.getElementById(
+                        "createAssessmentModal"
+                    );
+
+
+                const editModal =
+                    document.getElementById(
+                        "editAssessmentModal"
+                    );
+
+
+                if (
+                    event.target ===
+                    createModal
+                ) {
+
+                    closeCreateAssessment();
+
+                }
+
+
+                if (
+                    event.target ===
+                    editModal
+                ) {
+
+                    closeEditAssessment();
+
+                }
+
+            }
+        );
+
+
+        // ==================================================
+        // ESC KEY
+        // ==================================================
+
+        window.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeCreateAssessment();
+
+                    closeEditAssessment();
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

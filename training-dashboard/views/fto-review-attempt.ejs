@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Attempt | HCP Interactive Training</title>
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+<header class="training-topbar">
+
+    <a href="/training" class="training-brand">
+        <div class="training-brand-logo">
+            <img src="/public/images/HCPIT.png" alt="HCP Interactive Training">
+        </div>
+
+        <div class="training-brand-text">
+            <strong>Hendry County</strong>
+            <span>Interactive Training</span>
+        </div>
+    </a>
+
+    <nav class="training-nav">
+        <a href="/training">Home</a>
+        <% if (permissions.isManagement || permissions.traineeDepartments.length > 0) { %>
+
+            <a href="/training/my-training">
+
+                My Training
+
+            </a>
+
+        <% } %>
+        <% if (permissions.isManagement) { %>
+
+            <a href="/training/assessments">
+
+                Assessments
+
+            </a>
+
+        <% } %>
+        <% if (permissions.isManagement || permissions.ftoDepartments.length > 0) { %>
+
+            <a href="/training/fto-review" class="active">
+
+                FTO Review
+
+            </a>
+
+        <% } %>
+        <a href="/training/results">Results</a>
+    </nav>
+
+    <div class="training-user-box">
+        <img src="<%= user.avatar %>" alt="<%= user.displayName %>">
+
+        <div class="training-user-info">
+            <strong><%= user.displayName %></strong>
+            <span>FTO Review</span>
+        </div>
+
+        <a href="/logout" class="training-logout">
+            Logout
+        </a>
+    </div>
+
+</header>
+
+
+<main class="training-page fto-review-page">
+
+    <a
+        href="/training/fto-review"
+        class="builder-back-link"
+    >
+        ← Back to Review Queue
+    </a>
+
+
+    <section class="fto-attempt-header">
+
+        <div>
+            <div class="training-eyebrow">
+                <%= attempt.department_code %> · FTO REVIEW
+            </div>
+
+            <h1>
+                <%= attempt.assessment_name %>
+            </h1>
+
+            <p>
+                Reviewing submission from
+                <strong>
+                    <%= attempt.trainee_username %>
+                </strong>
+            </p>
+        </div>
+
+
+        <div class="fto-attempt-outcome <%= attempt.final_outcome %>">
+
+            <% if (attempt.status === "pending_review") { %>
+                <span>
+                    STATUS
+                </span>
+
+                <strong>
+                    PENDING REVIEW
+                </strong>
+            <% } else { %>
+                <span>
+                    FINAL RESULT
+                </span>
+
+                <strong>
+                    <%= String(attempt.final_outcome).toUpperCase() %>
+                </strong>
+
+                <small>
+                    <%= Number(attempt.percentage || 0).toFixed(2) %>%
+                </small>
+            <% } %>
+
+        </div>
+
+    </section>
+
+
+    <% if (typeof message !== "undefined" && message) { %>
+        <div class="training-alert success">
+            <%= message %>
+        </div>
+    <% } %>
+
+    <% if (error) { %>
+        <div class="training-alert error">
+            <%= error %>
+        </div>
+    <% } %>
+
+
+    <section class="fto-attempt-summary">
+
+        <article>
+            <span>
+                Automatic Marks
+            </span>
+
+            <strong>
+                <%= Number(attempt.auto_marks || 0).toFixed(2) %>
+            </strong>
+        </article>
+
+        <article>
+            <span>
+                Manual Marks
+            </span>
+
+            <strong>
+                <%= Number(attempt.manual_marks || 0).toFixed(2) %>
+            </strong>
+        </article>
+
+        <article>
+            <span>
+                Maximum Marks
+            </span>
+
+            <strong>
+                <%= Number(attempt.max_marks || 0).toFixed(2) %>
+            </strong>
+        </article>
+
+        <article>
+            <span>
+                Pass Mark
+            </span>
+
+            <strong>
+                <%= Number(attempt.pass_mark_percent || 70).toFixed(0) %>%
+            </strong>
+        </article>
+
+    </section>
+
+
+    <% if (automaticAnswers.length) { %>
+
+        <section class="fto-answer-section">
+
+            <div class="fto-answer-section-heading">
+                <div class="training-eyebrow">
+                    AUTOMATIC MARKING
+                </div>
+
+                <h2>
+                    Quiz Answers
+                </h2>
+            </div>
+
+
+            <div class="fto-answer-list">
+
+                <% automaticAnswers.forEach((answer, index) => { %>
+
+                    <article class="fto-answer-card auto">
+
+                        <div class="fto-answer-number">
+                            <%= index + 1 %>
+                        </div>
+
+                        <div class="fto-answer-main">
+
+                            <div class="fto-answer-type">
+                                <%= answer.question_type.replaceAll("_", " ").toUpperCase() %>
+                            </div>
+
+                            <h3>
+                                <%= answer.question_text %>
+                            </h3>
+
+                            <div class="fto-answer-response">
+                                <span>
+                                    TRAINEE ANSWER
+                                </span>
+
+                                <strong>
+                                    <%= answer.answer_text || "No answer" %>
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <div class="fto-auto-score <%= Number(answer.is_correct) === 1 ? 'correct' : 'incorrect' %>">
+                            <strong>
+                                <%= Number(answer.awarded_marks || 0).toFixed(2) %>
+                                /
+                                <%= Number(answer.max_marks || 0).toFixed(2) %>
+                            </strong>
+
+                            <span>
+                                <%= Number(answer.is_correct) === 1 ? "CORRECT" : "INCORRECT" %>
+                            </span>
+                        </div>
+
+                    </article>
+
+                <% }) %>
+
+            </div>
+
+        </section>
+
+    <% } %>
+
+
+    <form
+        method="POST"
+        action="/training/fto-review/<%= attempt.id %>/complete"
+    >
+
+        <section class="fto-answer-section">
+
+            <div class="fto-answer-section-heading">
+                <div class="training-eyebrow">
+                    MANUAL MARKING
+                </div>
+
+                <h2>
+                    FTO Assessment
+                </h2>
+
+                <p>
+                    Award marks for every practical or written item.
+                </p>
+            </div>
+
+
+            <% if (!manualAnswers.length) { %>
+
+                <div class="fto-review-empty compact">
+                    This submission has no manual questions.
+                </div>
+
+            <% } else { %>
+
+                <div class="fto-answer-list">
+
+                    <% manualAnswers.forEach((answer, index) => { %>
+
+                        <article class="fto-answer-card manual">
+
+                            <div class="fto-answer-number">
+                                <%= index + 1 %>
+                            </div>
+
+                            <div class="fto-answer-main">
+
+                                <div class="fto-answer-type">
+                                    <%= answer.question_type.replaceAll("_", " ").toUpperCase() %>
+                                </div>
+
+                                <h3>
+                                    <%= answer.question_text %>
+                                </h3>
+
+                                <div class="fto-answer-response">
+                                    <span>
+                                        TRAINEE RESPONSE
+                                    </span>
+
+                                    <strong>
+                                        <%= answer.answer_text || "Practical assessment to be observed by FTO." %>
+                                    </strong>
+                                </div>
+
+
+                                <div class="fto-marking-fields">
+
+                                    <div class="training-field">
+
+                                        <label>
+                                            Marks Awarded
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            name="marks_<%= answer.id %>"
+                                            min="0"
+                                            max="<%= Number(answer.max_marks) %>"
+                                            step="0.5"
+                                            value="<%= answer.awarded_marks !== null ? Number(answer.awarded_marks) : '' %>"
+                                            required
+                                            <%= attempt.status === "completed" ? "disabled" : "" %>
+                                        >
+
+                                        <small>
+                                            Maximum:
+                                            <%= Number(answer.max_marks).toFixed(2) %>
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="training-field">
+
+                                        <label>
+                                            FTO Notes
+                                        </label>
+
+                                        <textarea
+                                            name="notes_<%= answer.id %>"
+                                            rows="3"
+                                            placeholder="Optional feedback for this item..."
+                                            <%= attempt.status === "completed" ? "disabled" : "" %>
+                                        ><%= answer.review_notes || "" %></textarea>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    <% }) %>
+
+                </div>
+
+            <% } %>
+
+        </section>
+
+
+        <section class="fto-final-decision">
+
+            <div>
+
+                <div class="training-eyebrow">
+                    FINAL DECISION
+                </div>
+
+                <h2>
+                    Complete FTO Review
+                </h2>
+
+                <p>
+                    The final PASS / FAIL outcome is calculated automatically
+                    from the total marks and the assessment pass mark.
+                </p>
+
+            </div>
+
+
+            <div class="training-field fto-final-notes">
+
+                <label>
+                    Overall FTO Notes
+                </label>
+
+                <textarea
+                    name="fto_notes"
+                    rows="4"
+                    placeholder="Optional overall feedback for the trainee..."
+                    <%= attempt.status === "completed" ? "disabled" : "" %>
+                ><%= attempt.fto_notes || "" %></textarea>
+
+            </div>
+
+
+            <% if (attempt.status === "pending_review") { %>
+
+                <button
+                    type="submit"
+                    class="fto-complete-review-button"
+                    onclick="return confirm('Complete this FTO review and publish the final result?');"
+                >
+                    Complete Review & Calculate Result
+                </button>
+
+            <% } else { %>
+
+                <div class="fto-completed-banner <%= attempt.final_outcome %>">
+
+                    Review completed.
+
+                    <strong>
+                        <%= String(attempt.final_outcome).toUpperCase() %>
+                        ·
+                        <%= Number(attempt.percentage || 0).toFixed(2) %>%
+                    </strong>
+
+                </div>
+
+            <% } %>
+
+        </section>
+
+    </form>
+
+</main>
+
+</body>
+</html>

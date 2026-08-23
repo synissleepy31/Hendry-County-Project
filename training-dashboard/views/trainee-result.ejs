@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= attempt.assessment_name %> Result | HCP Interactive Training</title>
+
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+    <header class="training-topbar">
+        <a href="/training" class="training-brand">
+            <div class="training-brand-logo">
+                <img
+                    src="/public/images/HCPIT.png"
+                    alt="HCP Interactive Training"
+                >
+            </div>
+
+            <div class="training-brand-text">
+                <strong>Hendry County</strong>
+                <span>Interactive Training</span>
+            </div>
+        </a>
+
+        <nav class="training-nav">
+            <a href="/training">Home</a>
+            <% if (permissions.isManagement) { %>
+
+                <a href="/training/departments">
+
+                    Departments
+
+                </a>
+
+            <% } %>
+            <% if (permissions.isManagement) { %>
+
+                <a href="/training/assessments">
+
+                    Assessments
+
+                </a>
+
+            <% } %>
+            <a href="/training/my-training" class="active">My Training</a>
+            <a href="/training/results">Results</a>
+        </nav>
+
+        <div class="training-user-box">
+            <img
+                src="<%= user.avatar %>"
+                alt="<%= user.displayName %>"
+            >
+
+            <div class="training-user-info">
+                <strong><%= user.displayName %></strong>
+                <span>Trainee</span>
+            </div>
+
+            <a href="/logout" class="training-logout">
+                Logout
+            </a>
+        </div>
+    </header>
+
+
+    <main class="training-page trainee-result-page">
+
+        <a
+            href="/training/my-training"
+            class="builder-back-link"
+        >
+            ← Back to My Training
+        </a>
+
+
+        <section class="trainee-result-hero <%= attempt.final_outcome %>">
+
+            <div class="training-eyebrow">
+                <%= attempt.department_code %> · SUBMISSION RECEIVED
+            </div>
+
+            <% if (attempt.final_outcome === 'pending') { %>
+                <div class="trainee-result-status pending">
+                    PENDING FTO REVIEW
+                </div>
+            <% } else if (attempt.final_outcome === 'pass') { %>
+                <div class="trainee-result-status pass">
+                    PASSED
+                </div>
+            <% } else { %>
+                <div class="trainee-result-status fail">
+                    FAILED
+                </div>
+            <% } %>
+
+            <h1>
+                <%= attempt.assessment_name %>
+            </h1>
+
+            <% if (attempt.final_outcome === 'pending') { %>
+                <p>
+                    Your automatically marked questions have been scored. Your written and/or
+                    practical items are now waiting for an FTO to review before your final result is confirmed.
+                </p>
+            <% } else { %>
+                <p>
+                    This assessment has been fully marked and your final result is ready.
+                </p>
+            <% } %>
+
+        </section>
+
+
+        <section class="trainee-result-stats">
+
+            <article>
+                <span>AUTO MARKS</span>
+                <strong>
+                    <%= Number(attempt.auto_marks).toFixed(Number(attempt.auto_marks) % 1 === 0 ? 0 : 1) %>
+                    /
+                    <%= Number(attempt.auto_possible_marks).toFixed(Number(attempt.auto_possible_marks) % 1 === 0 ? 0 : 1) %>
+                </strong>
+                <small><%= autoPercentage.toFixed(2) %>% auto-marked score</small>
+            </article>
+
+            <article>
+                <span>MANUAL MARKS</span>
+                <strong>
+                    <% if (attempt.final_outcome === 'pending') { %>
+                        Pending
+                    <% } else { %>
+                        <%= Number(attempt.manual_marks).toFixed(Number(attempt.manual_marks) % 1 === 0 ? 0 : 1) %>
+                    <% } %>
+                </strong>
+                <small>FTO-reviewed items</small>
+            </article>
+
+            <article>
+                <span>FINAL SCORE</span>
+                <strong>
+                    <% if (attempt.percentage === null) { %>
+                        Pending
+                    <% } else { %>
+                        <%= Number(attempt.percentage).toFixed(2) %>%
+                    <% } %>
+                </strong>
+                <small>Pass mark <%= Number(attempt.pass_mark_percent).toFixed(0) %>%</small>
+            </article>
+
+            <article>
+                <span>TOTAL MARKS</span>
+                <strong>
+                    <%= Number(attempt.total_marks).toFixed(Number(attempt.total_marks) % 1 === 0 ? 0 : 1) %>
+                    /
+                    <%= Number(attempt.max_marks).toFixed(Number(attempt.max_marks) % 1 === 0 ? 0 : 1) %>
+                </strong>
+                <small>Current awarded marks</small>
+            </article>
+
+        </section>
+
+
+        <section class="trainee-result-breakdown">
+
+            <div class="trainee-result-section-heading">
+                <div>
+                    <div class="training-eyebrow">
+                        ANSWER BREAKDOWN
+                    </div>
+
+                    <h2>
+                        Your submission
+                    </h2>
+                </div>
+
+                <span>
+                    Attempt #<%= attempt.id %>
+                </span>
+            </div>
+
+
+            <% answers.forEach((answer, index) => { %>
+
+                <article class="trainee-result-answer">
+
+                    <div class="trainee-result-answer-number">
+                        <%= index + 1 %>
+                    </div>
+
+                    <div class="trainee-result-answer-main">
+
+                        <div class="trainee-result-answer-meta">
+                            <span>
+                                <%= answer.question_type.replaceAll('_', ' ').toUpperCase() %>
+                            </span>
+
+                            <% if (answer.requires_manual_marking) { %>
+                                <span class="pending-review-badge">
+                                    FTO REVIEW
+                                </span>
+                            <% } else if (Number(answer.is_correct) === 1) { %>
+                                <span class="correct-review-badge">
+                                    CORRECT
+                                </span>
+                            <% } else { %>
+                                <span class="incorrect-review-badge">
+                                    INCORRECT
+                                </span>
+                            <% } %>
+                        </div>
+
+                        <h3>
+                            <%= answer.question_text %>
+                        </h3>
+
+                        <% if (answer.answer_text) { %>
+                            <div class="trainee-result-response">
+                                <span>YOUR ANSWER</span>
+                                <p><%= answer.answer_text %></p>
+                            </div>
+                        <% } %>
+
+                        <% if (answer.review_notes) { %>
+                            <div class="trainee-result-review-note">
+                                <span>FTO NOTE</span>
+                                <p><%= answer.review_notes %></p>
+                            </div>
+                        <% } %>
+
+                    </div>
+
+                    <div class="trainee-result-answer-score">
+                        <% if (answer.awarded_marks === null) { %>
+                            <strong>—</strong>
+                        <% } else { %>
+                            <strong>
+                                <%= Number(answer.awarded_marks).toFixed(Number(answer.awarded_marks) % 1 === 0 ? 0 : 1) %>
+                            </strong>
+                        <% } %>
+
+                        <span>
+                            / <%= Number(answer.max_marks).toFixed(Number(answer.max_marks) % 1 === 0 ? 0 : 1) %>
+                        </span>
+                    </div>
+
+                </article>
+
+            <% }) %>
+
+        </section>
+
+
+        <div class="trainee-result-actions">
+            <a
+                href="/training/my-training"
+                class="trainee-primary-button"
+            >
+                Back to My Training
+            </a>
+        </div>
+
+    </main>
+
+</body>
+</html>

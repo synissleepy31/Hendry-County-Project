@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Live Training | <%= session.assessment_name %></title>
+
+    <link rel="icon" type="image/png" href="/public/images/HCPIT.png">
+    <link rel="stylesheet" href="/public/css/training.css">
+</head>
+
+<body>
+
+<header class="training-topbar">
+
+    <a href="/training" class="training-brand">
+
+        <div class="training-brand-logo">
+            <img src="/public/images/HCPIT.png" alt="HCP">
+        </div>
+
+        <div class="training-brand-text">
+            <strong>Hendry County</strong>
+            <span>Interactive Training</span>
+        </div>
+
+    </a>
+
+
+    <div class="live-trainee-status">
+        <span class="live-dot"></span>
+        LIVE · <%= session.department_code %>
+    </div>
+
+
+    <div class="training-user-box">
+
+        <img
+            src="<%= user.avatar %>"
+            alt="<%= user.displayName %>"
+        >
+
+        <div class="training-user-info">
+            <strong>
+                <%= user.displayName %>
+            </strong>
+
+            <span>
+                Trainee
+            </span>
+        </div>
+
+    </div>
+
+</header>
+
+<div
+    id="liveConnectionBanner"
+    class="live-connection-banner"
+    hidden
+>
+    Reconnecting to your FTO…
+</div>
+
+
+<main class="live-trainee-page">
+
+    <section class="live-trainee-heading">
+
+        <div>
+
+            <div class="training-eyebrow">
+                FOLLOWING YOUR FTO
+            </div>
+
+            <h1>
+                <%= session.assessment_name %>
+            </h1>
+
+            <p>
+                Your screen automatically moves when your FTO changes section.
+            </p>
+
+        </div>
+
+
+        <div
+            class="live-sync-badge"
+            id="syncBadge"
+        >
+            ● Synced
+        </div>
+
+    </section>
+
+
+    <% sections.forEach((section, index) => { %>
+
+        <% const sectionQuestions = questionsBySection[String(section.id)] || []; %>
+
+        <article
+            class="live-trainee-panel <%= Number(state.current_section_id) === Number(section.id) ? 'active' : '' %>"
+            data-panel-id="<%= section.id %>"
+            data-has-questions="<%= sectionQuestions.length ? '1' : '0' %>"
+            data-submitted="<%= submittedSections.includes(Number(section.id)) ? '1' : '0' %>"
+        >
+
+            <div class="live-section-counter">
+                SECTION <%= index + 1 %>
+                OF <%= sections.length %>
+            </div>
+
+            <h2>
+                <%= section.title %>
+            </h2>
+
+
+            <div class="live-content-box trainee">
+
+                <div class="live-rich-content">
+                    <%- section.trainee_content || '<p>Waiting for your FTO.</p>' %>
+                </div>
+
+            </div>
+
+
+            <% if (sectionQuestions.length) { %>
+
+                <section
+                    class="live-trainee-quiz"
+                    data-quiz-section="<%= section.id %>"
+                >
+
+                    <div class="live-quiz-locked">
+
+                        <div class="live-lock-icon">
+                            ◷
+                        </div>
+
+                        <strong>
+                            Questions locked
+                        </strong>
+
+                        <p>
+                            Your FTO will open this section's questions when it is time to answer.
+                        </p>
+
+                    </div>
+
+
+                    <form
+                        class="live-quiz-form"
+                        data-live-form="<%= section.id %>"
+                        onsubmit="submitLiveAnswers(event, <%= section.id %>)"
+                    >
+
+                        <div class="live-trainee-quiz-heading">
+
+                            <div>
+                                <div class="training-eyebrow">
+                                    KNOWLEDGE CHECK
+                                </div>
+
+                                <h3>
+                                    <%= sectionQuestions.length %>
+                                    question<%= sectionQuestions.length === 1 ? '' : 's' %>
+                                </h3>
+                            </div>
+
+                            <span>
+                                <%= sectionQuestions.reduce((sum, question) => sum + Number(question.max_marks || 0), 0) %>
+                                marks
+                            </span>
+
+                        </div>
+
+
+                        <% sectionQuestions.forEach((question, questionIndex) => { %>
+
+                            <article class="live-question-item">
+
+                                <div class="live-question-title">
+
+                                    <span>
+                                        <%= questionIndex + 1 %>
+                                    </span>
+
+                                    <strong>
+                                        <%= question.question_text %>
+                                    </strong>
+
+                                </div>
+
+
+                                <% if (question.question_type === "multiple_choice") { %>
+
+                                    <div class="trainee-answer-options">
+
+                                        <% question.options.forEach((option, optionIndex) => { %>
+
+                                            <label>
+
+                                                <input
+                                                    type="radio"
+                                                    name="question_<%= question.id %>"
+                                                    value="<%= optionIndex %>"
+                                                    <%= optionIndex === 0 ? "required" : "" %>
+                                                >
+
+                                                <span>
+                                                    <%= option %>
+                                                </span>
+
+                                            </label>
+
+                                        <% }) %>
+
+                                    </div>
+
+                                <% } %>
+
+
+                                <% if (question.question_type === "yes_no") { %>
+
+                                    <div class="trainee-answer-options">
+
+                                        <label>
+
+                                            <input
+                                                type="radio"
+                                                name="question_<%= question.id %>"
+                                                value="yes"
+                                                required
+                                            >
+
+                                            <span>
+                                                Yes
+                                            </span>
+
+                                        </label>
+
+
+                                        <label>
+
+                                            <input
+                                                type="radio"
+                                                name="question_<%= question.id %>"
+                                                value="no"
+                                            >
+
+                                            <span>
+                                                No
+                                            </span>
+
+                                        </label>
+
+                                    </div>
+
+                                <% } %>
+
+
+                                <% if (question.question_type === "text") { %>
+
+                                    <textarea
+                                        class="trainee-written-answer"
+                                        name="question_<%= question.id %>"
+                                        rows="4"
+                                        placeholder="Enter your answer..."
+                                        required
+                                    ></textarea>
+
+                                    <div class="trainee-manual-note">
+                                        Your FTO will mark this answer.
+                                    </div>
+
+                                <% } %>
+
+
+                                <% if (question.question_type === "practical") { %>
+
+                                    <div class="trainee-practical-card">
+
+                                        <div>
+                                            PRACTICAL ASSESSMENT
+                                        </div>
+
+                                        <p>
+                                            Complete this task when instructed by your FTO.
+                                            The FTO will award up to
+                                            <strong>
+                                                <%= Number(question.max_marks).toFixed(0) %>
+                                            </strong>
+                                            marks live.
+                                        </p>
+
+                                    </div>
+
+                                <% } %>
+
+                            </article>
+
+                        <% }) %>
+
+
+                        <button
+                            type="submit"
+                            class="training-save-button live-submit-answers"
+                        >
+                            Submit Answers to FTO
+                        </button>
+
+
+                        <div class="live-answer-message"></div>
+
+                    </form>
+
+                </section>
+
+            <% } %>
+
+        </article>
+
+    <% }) %>
+
+
+    <div
+        id="sessionEnded"
+        class="live-ended"
+        hidden
+    >
+
+        <h2>
+            Training session completed.
+        </h2>
+
+        <p>
+            Your FTO has ended this live session.
+        </p>
+
+        <a
+            href="/training"
+            class="training-save-button"
+        >
+            Return to Dashboard
+        </a>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    const sessionId =
+        <%= session.id %>;
+
+
+    let currentSectionId =
+        <%= state.current_section_id ? Number(state.current_section_id) : "null" %>;
+
+
+    let quizOpen =
+        <%= Number(state.quiz_open) ? "true" : "false" %>;
+
+
+    function currentPanel() {
+
+        return document.querySelector(
+            `.live-trainee-panel[data-panel-id="${currentSectionId}"]`
+        );
+    }
+
+
+    function showSection(
+        sectionId
+    ) {
+
+        currentSectionId =
+            Number(
+                sectionId
+            );
+
+
+        document
+            .querySelectorAll(
+                ".live-trainee-panel"
+            )
+            .forEach(
+                panel => {
+
+                    panel.classList.toggle(
+                        "active",
+                        Number(
+                            panel.dataset.panelId
+                        ) ===
+                        currentSectionId
+                    );
+                }
+            );
+
+
+        updateQuizState();
+    }
+
+
+    function updateQuizState() {
+
+        const panel =
+            currentPanel();
+
+
+        if (!panel) {
+            return;
+        }
+
+
+        const quiz =
+            panel.querySelector(
+                ".live-trainee-quiz"
+            );
+
+
+        if (!quiz) {
+            return;
+        }
+
+
+        const submitted =
+            panel.dataset.submitted ===
+            "1";
+
+
+        quiz.classList.toggle(
+            "open",
+            quizOpen ||
+            submitted
+        );
+
+
+        quiz.classList.toggle(
+            "submitted",
+            submitted
+        );
+
+
+        const button =
+            quiz.querySelector(
+                ".live-submit-answers"
+            );
+
+
+        if (
+            button &&
+            submitted
+        ) {
+            button.disabled =
+                true;
+
+            button.textContent =
+                "Answers Submitted ✓";
+        }
+    }
+
+
+    async function submitLiveAnswers(
+        event,
+        sectionId
+    ) {
+
+        event.preventDefault();
+
+
+        if (
+            Number(
+                sectionId
+            ) !==
+            Number(
+                currentSectionId
+            )
+        ) {
+            return;
+        }
+
+
+        const form =
+            event.currentTarget;
+
+
+        const button =
+            form.querySelector(
+                ".live-submit-answers"
+            );
+
+
+        const message =
+            form.querySelector(
+                ".live-answer-message"
+            );
+
+
+        button.disabled =
+            true;
+
+
+        button.textContent =
+            "Submitting…";
+
+
+        const response =
+            await fetch(
+                `/training/live/${sessionId}/answers`,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+                    },
+
+                    body:
+                        new URLSearchParams(
+                            new FormData(
+                                form
+                            )
+                        )
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.ok) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Submit Answers to FTO";
+
+            message.textContent =
+                result.message ||
+                "Could not submit your answers.";
+
+            message.className =
+                "live-answer-message error";
+
+            return;
+        }
+
+
+        const panel =
+            currentPanel();
+
+
+        panel.dataset.submitted =
+            "1";
+
+
+        button.textContent =
+            "Answers Submitted ✓";
+
+
+        message.textContent =
+            result.message;
+
+
+        message.className =
+            "live-answer-message success";
+
+
+        updateQuizState();
+    }
+
+
+    async function refreshState() {
+
+        try {
+            const response =
+                await fetch(
+                    `/training/live/${sessionId}/state`
+                );
+
+
+            const state =
+                await response.json();
+
+
+            if (!state.ok) {
+                return;
+            }
+
+
+            const banner =
+                document.getElementById(
+                    "liveConnectionBanner"
+                );
+
+
+            banner.hidden =
+                true;
+
+
+            const changedSection =
+                state.currentSectionId &&
+                Number(
+                    state.currentSectionId
+                ) !==
+                Number(
+                    currentSectionId
+                );
+
+
+            quizOpen =
+                Boolean(
+                    state.quizOpen
+                );
+
+
+            if (changedSection) {
+
+                document
+                    .getElementById(
+                        "syncBadge"
+                    )
+                    .textContent =
+                    "● Updating…";
+
+
+                showSection(
+                    state.currentSectionId
+                );
+
+
+                document
+                    .getElementById(
+                        "syncBadge"
+                    )
+                    .textContent =
+                    "● Synced";
+
+            } else {
+
+                updateQuizState();
+            }
+
+
+            if (
+                state.status ===
+                "completed"
+            ) {
+                document
+                    .querySelectorAll(
+                        ".live-trainee-panel"
+                    )
+                    .forEach(
+                        panel =>
+                            panel.classList.remove(
+                                "active"
+                            )
+                    );
+
+
+                document
+                    .getElementById(
+                        "sessionEnded"
+                    )
+                    .hidden =
+                    false;
+
+
+                document
+                    .getElementById(
+                        "syncBadge"
+                    )
+                    .textContent =
+                    "Session Ended";
+            }
+
+
+        } catch {
+
+            document
+                .getElementById(
+                    "syncBadge"
+                )
+                .textContent =
+                "● Reconnecting…";
+
+
+            document
+                .getElementById(
+                    "liveConnectionBanner"
+                )
+                .hidden =
+                false;
+        }
+    }
+
+
+    showSection(
+        currentSectionId
+    );
+
+
+    setInterval(
+        refreshState,
+        1500
+    );
+
+</script>
+
+</body>
+</html>
