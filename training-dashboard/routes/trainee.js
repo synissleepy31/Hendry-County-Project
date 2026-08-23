@@ -1,5 +1,5 @@
 import express from "express";
-import trainingDatabase from "../services/database.js";
+import trainingDatabase, { ensureSpecialTrainingDepartments } from "../services/database.js";
 import { getPermissions, canAccessDepartment, renderAccessDenied } from "../services/permissions.js";
 
 const router = express.Router();
@@ -123,6 +123,9 @@ router.get(
     requireTrainingLogin,
     async (req, res) => {
         try {
+
+            await ensureSpecialTrainingDepartments();
+
             await ensureSubmissionTables();
 
             const user =

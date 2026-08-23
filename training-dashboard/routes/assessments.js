@@ -111,6 +111,9 @@ router.get(
 
         try {
 
+            await ensureSpecialTrainingDepartments();
+
+
             const user =
                 getTrainingUserDetails(
                     req.session.trainingUser
@@ -603,7 +606,7 @@ router.post(
 
 
 // ======================================================
-// DELETE ASSESSMENT
+// DELETE / ARCHIVE ASSESSMENT
 // ======================================================
 
 router.post(
@@ -613,6 +616,9 @@ router.post(
         req,
         res
     ) => {
+
+        let connection;
+
 
         try {
 
@@ -630,13 +636,162 @@ router.post(
                         "Invalid assessment."
                     )
                 );
-
             }
 
 
-            await trainingDatabase.execute(
+            const [
+                assessmentRows
+            ] =
+                await trainingDatabase.execute(
+                    `
+                        SELECT
+                            id,
+                            name
+
+                        FROM training_assessments
+
+                        WHERE id = ?
+
+                        LIMIT 1
+                    `,
+                    [
+                        assessmentId
+                    ]
+                );
+
+
+            if (
+                !assessmentRows.length
+            ) {
+
+                return res.redirect(
+                    "/training/assessments?error=" +
+                    encodeURIComponent(
+                        "That assessment no longer exists."
+                    )
+                );
+            }
+
+
+            const assessment =
+                assessmentRows[0];
+
+
+            const [
+                referenceRows
+            ] =
+                await trainingDatabase.execute(
+                    `
+                        SELECT
+                            (
+                                SELECT COUNT(*)
+
+                                FROM training_sessions
+
+                                WHERE assessment_id = ?
+                            )
+                                AS session_count,
+
+                            (
+                                SELECT COUNT(*)
+
+                                FROM training_attempts
+
+                                WHERE assessment_id = ?
+                            )
+                                AS attempt_count
+                    `,
+                    [
+                        assessmentId,
+                        assessmentId
+                    ]
+                );
+
+
+            const sessionCount =
+                Number(
+                    referenceRows[0]?.session_count ||
+                    0
+                );
+
+
+            const attemptCount =
+                Number(
+                    referenceRows[0]?.attempt_count ||
+                    0
+                );
+
+
+            // Preserve historical results/sessions instead of breaking foreign keys.
+            if (
+                sessionCount > 0 ||
+                attemptCount > 0
+            ) {
+
+                await trainingDatabase.execute(
+                    `
+                        UPDATE training_assessments
+
+                        SET is_active = 0
+
+                        WHERE id = ?
+                    `,
+                    [
+                        assessmentId
+                    ]
+                );
+
+
+                return res.redirect(
+                    "/training/assessments?message=" +
+                    encodeURIComponent(
+                        `${assessment.name} had existing training history, so it was safely archived instead of permanently deleted.`
+                    )
+                );
+            }
+
+
+            connection =
+                await trainingDatabase.getConnection();
+
+
+            await connection.beginTransaction();
+
+
+            await connection.execute(
+                `
+                    DELETE q
+
+                    FROM training_questions q
+
+                    INNER JOIN training_sections s
+                        ON s.id =
+                        q.section_id
+
+                    WHERE s.assessment_id = ?
+                `,
+                [
+                    assessmentId
+                ]
+            );
+
+
+            await connection.execute(
+                `
+                    DELETE FROM training_sections
+
+                    WHERE assessment_id = ?
+                `,
+                [
+                    assessmentId
+                ]
+            );
+
+
+            await connection.execute(
                 `
                     DELETE FROM training_assessments
+
                     WHERE id = ?
                 `,
                 [
@@ -645,15 +800,30 @@ router.post(
             );
 
 
+            await connection.commit();
+
+
             return res.redirect(
                 "/training/assessments?message=" +
                 encodeURIComponent(
-                    "Assessment deleted successfully."
+                    `${assessment.name} was deleted successfully.`
                 )
             );
 
 
         } catch (error) {
+
+            if (connection) {
+
+                try {
+
+                    await connection.rollback();
+
+                } catch {
+                    // Ignore rollback failure.
+                }
+            }
+
 
             console.error(
                 "[TRAINING ASSESSMENT] Delete error:",
@@ -664,12 +834,18 @@ router.post(
             return res.redirect(
                 "/training/assessments?error=" +
                 encodeURIComponent(
-                    "Could not delete that assessment."
+                    "Could not delete that assessment. Check the server console for the database error."
                 )
             );
 
-        }
 
+        } finally {
+
+            if (connection) {
+
+                connection.release();
+            }
+        }
     }
 );
 

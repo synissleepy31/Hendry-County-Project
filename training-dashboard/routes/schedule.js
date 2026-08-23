@@ -1,7 +1,7 @@
 import express from "express";
 import crypto from "node:crypto";
 
-import trainingDatabase from "../services/database.js";
+import trainingDatabase, { ensureSpecialTrainingDepartments } from "../services/database.js";
 
 import {
     getPermissions,
@@ -443,15 +443,31 @@ async function sendDiscordAttendanceMessage(
     const payload = {
 
         content:
-            `<@&${
-                session.department_code === "HCSO"
-                    ? "1533636130791096393"
-                    : session.department_code === "CPD"
-                        ? "1533641168775151728"
-                        : session.department_code === "FHP"
-                            ? "1533634185854718042"
-                            : ""
-            }>`,
+            session.department_code === "JOINT"
+
+                ? [
+                    "<@&1533636130791096393>",
+                    "<@&1533641168775151728>",
+                    "<@&1533634185854718042>"
+                ].join(" ")
+
+                : session.department_code === "STAFF"
+
+                    ? "<@&1533590255834366065>"
+
+                    : session.department_code === "HCSO"
+
+                        ? "<@&1533636130791096393>"
+
+                        : session.department_code === "CPD"
+
+                            ? "<@&1533641168775151728>"
+
+                            : session.department_code === "FHP"
+
+                                ? "<@&1533634185854718042>"
+
+                                : "",
 
         allowed_mentions: {
             parse: [
@@ -707,6 +723,9 @@ router.get(
     ) => {
 
         try {
+
+            await ensureSpecialTrainingDepartments();
+
 
             await ensureScheduleTables();
 

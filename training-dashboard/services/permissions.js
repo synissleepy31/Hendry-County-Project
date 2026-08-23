@@ -5,20 +5,150 @@ export const TRAINING_ROLES = {
     departments: {
         HCSO: { fto: "1533639546531614901", trainee: "1533636130791096393" },
         CPD:  { fto: "1533640225753006171", trainee: "1533641168775151728" },
-        FHP:  { fto: "1533631308557844541", trainee: "1533634185854718042" }
+        FHP:  { fto: "1533631308557844541", trainee: "1533634185854718042" },
+
+        STAFF: {
+            fto: "1533596635156713543",
+            trainee: "1533590255834366065"
+        }
     }
 };
 
 export function getPermissions(req) {
-    const roles = new Set(req.session?.trainingRoles || []);
-    const isManagement = roles.has(TRAINING_ROLES.management) || roles.has(TRAINING_ROLES.admin);
-    const ftoDepartments = Object.entries(TRAINING_ROLES.departments)
-        .filter(([, cfg]) => roles.has(cfg.fto))
-        .map(([code]) => code);
-    const traineeDepartments = Object.entries(TRAINING_ROLES.departments)
-        .filter(([, cfg]) => roles.has(cfg.trainee))
-        .map(([code]) => code);
-    return { isManagement, isAdmin: isManagement, ftoDepartments, traineeDepartments, roles: [...roles] };
+
+    const roles =
+        new Set(
+            req.session?.trainingRoles ||
+            []
+        );
+
+
+    const isManagement =
+        roles.has(
+            TRAINING_ROLES.management
+        ) ||
+        roles.has(
+            TRAINING_ROLES.admin
+        );
+
+
+    const ftoDepartments =
+        Object.entries(
+            TRAINING_ROLES.departments
+        )
+            .filter(
+                (
+                    [
+                        ,
+                        config
+                    ]
+                ) =>
+                    roles.has(
+                        config.fto
+                    )
+            )
+            .map(
+                (
+                    [
+                        code
+                    ]
+                ) =>
+                    code
+            );
+
+
+    const traineeDepartments =
+        Object.entries(
+            TRAINING_ROLES.departments
+        )
+            .filter(
+                (
+                    [
+                        ,
+                        config
+                    ]
+                ) =>
+                    roles.has(
+                        config.trainee
+                    )
+            )
+            .map(
+                (
+                    [
+                        code
+                    ]
+                ) =>
+                    code
+            );
+
+
+    const operationalDepartments =
+        new Set([
+            "HCSO",
+            "CPD",
+            "FHP"
+        ]);
+
+
+    const canFtoJoint =
+        ftoDepartments.some(
+            code =>
+                operationalDepartments.has(
+                    code
+                )
+        );
+
+
+    const canTraineeJoint =
+        traineeDepartments.some(
+            code =>
+                operationalDepartments.has(
+                    code
+                )
+        );
+
+
+    if (
+        canFtoJoint &&
+        !ftoDepartments.includes(
+            "JOINT"
+        )
+    ) {
+
+        ftoDepartments.push(
+            "JOINT"
+        );
+    }
+
+
+    if (
+        canTraineeJoint &&
+        !traineeDepartments.includes(
+            "JOINT"
+        )
+    ) {
+
+        traineeDepartments.push(
+            "JOINT"
+        );
+    }
+
+
+    return {
+        isManagement,
+
+        isAdmin:
+            isManagement,
+
+        ftoDepartments,
+
+        traineeDepartments,
+
+        roles:
+            [
+                ...roles
+            ]
+    };
 }
 
 export function renderAccessDenied(
