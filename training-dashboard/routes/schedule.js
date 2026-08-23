@@ -180,52 +180,164 @@ function getPublicTrainingUrl(req = null) {
             .trim()
             .replace(/\/+$/, "");
 
-    // Prefer a configured URL only if it is a Discord-compatible
-    // public HTTP(S) URL. Values such as localhost are valid to
-    // Node's URL parser but Discord rejects them for link buttons.
-    if (configured) {
+
+    function normalisePublicOrigin(value) {
+
+        if (!value) {
+            return "";
+        }
+
+
+        let candidate =
+            String(value)
+                .trim()
+                .split(",")[0]
+                .trim();
+
+
         try {
-            const parsed = new URL(configured);
-            const hostname = String(parsed.hostname || "").toLowerCase();
+
+            const parsed =
+                new URL(candidate);
+
+
+            const hostname =
+                String(parsed.hostname || "")
+                    .toLowerCase();
+
+
             const isLocal =
                 hostname === "localhost" ||
                 hostname === "127.0.0.1" ||
                 hostname === "0.0.0.0" ||
                 hostname === "::1";
 
-            if (["http:", "https:"].includes(parsed.protocol) && !isLocal) {
-                return configured;
+
+            if (
+                parsed.protocol !== "https:" &&
+                parsed.protocol !== "http:"
+            ) {
+                return "";
             }
+
+
+            if (isLocal) {
+                return "";
+            }
+
+
+            // Discord link buttons are happiest with a clean origin only.
+            // URL.origin also removes accidental paths/query strings.
+            return parsed.origin.replace(/\/+$/, "");
+
         } catch {
-            // Fall through and derive the public URL from the request.
+
+            return "";
         }
     }
 
-    // When hosted behind PebbleHost / a reverse proxy, derive the
-    // public browser-facing URL from forwarded headers.
+
+    // A manually configured public URL remains the first choice.
+    const configuredOrigin =
+        normalisePublicOrigin(
+            configured
+        );
+
+
+    if (configuredOrigin) {
+        return configuredOrigin;
+    }
+
+
     if (req) {
-        const forwardedProto = String(req.get?.("x-forwarded-proto") || "")
-            .split(",")[0]
-            .trim();
-        const forwardedHost = String(req.get?.("x-forwarded-host") || "")
-            .split(",")[0]
-            .trim();
-        const host = forwardedHost || String(req.get?.("host") || "").trim();
-        const protocol = forwardedProto || String(req.protocol || "https").trim();
 
-        if (host && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)(?::|$)/i.test(host)) {
-            const candidate = `${protocol}://${host}`.replace(/\/+$/, "");
+        // IMPORTANT: on PebbleHost/reverse-proxy setups the browser's Origin
+        // or Referer is often more reliable than Host/X-Forwarded-Host. It is
+        // the exact public address the user is currently visiting.
+        const requestOrigin =
+            normalisePublicOrigin(
+                req.get?.("origin")
+            );
 
-            try {
-                const parsed = new URL(candidate);
-                if (["http:", "https:"].includes(parsed.protocol)) {
-                    return candidate;
-                }
-            } catch {
-                // Ignore and return empty below.
-            }
+
+        if (requestOrigin) {
+            return requestOrigin;
+        }
+
+
+        const referer =
+            String(
+                req.get?.("referer") ||
+                ""
+            ).trim();
+
+
+        const refererOrigin =
+            normalisePublicOrigin(
+                referer
+            );
+
+
+        if (refererOrigin) {
+            return refererOrigin;
+        }
+
+
+        const forwardedProto =
+            String(
+                req.get?.("x-forwarded-proto") ||
+                ""
+            )
+                .split(",")[0]
+                .trim();
+
+
+        let forwardedHost =
+            String(
+                req.get?.("x-forwarded-host") ||
+                ""
+            )
+                .split(",")[0]
+                .trim();
+
+
+        let host =
+            forwardedHost ||
+            String(
+                req.get?.("host") ||
+                ""
+            ).trim();
+
+
+        // Some reverse proxies incorrectly send a full URL in the host
+        // header. Strip the scheme before rebuilding the origin.
+        host =
+            host.replace(
+                /^https?:\/\//i,
+                ""
+            );
+
+
+        const protocol =
+            forwardedProto === "http" ||
+            forwardedProto === "https"
+                ? forwardedProto
+                : "https";
+
+
+        const proxyOrigin =
+            normalisePublicOrigin(
+                host
+                    ? `${protocol}://${host}`
+                    : ""
+            );
+
+
+        if (proxyOrigin) {
+            return proxyOrigin;
         }
     }
+
 
     return "";
 }
@@ -522,6 +634,49 @@ async function sendDiscordAttendanceMessage(
 
     const sessionUrl =
         `${publicUrl}/training/schedule/${session.id}`;
+
+
+    const attendanceUrls = [
+        attendingUrl,
+        maybeUrl,
+        unavailableUrl,
+        sessionUrl
+    ];
+
+
+    for (const url of attendanceUrls) {
+
+        try {
+
+            const parsed = new URL(url);
+
+            if (
+                parsed.protocol !== "https:" &&
+                parsed.protocol !== "http:"
+            ) {
+                throw new Error("Unsupported protocol");
+            }
+
+        } catch {
+
+            console.error(
+                "[TRAINING SCHEDULE] Invalid attendance URL:",
+                url
+            );
+
+            return {
+                ok: false,
+                message:
+                    `Could not build a valid public attendance URL. Generated URL: ${url}`
+            };
+        }
+    }
+
+
+    console.log(
+        "[TRAINING SCHEDULE] Posting attendance with public URL:",
+        publicUrl
+    );
 
 
     const scheduledUnix =
