@@ -1,7 +1,6 @@
 import express from "express";
 
-import trainingDatabase
-    from "../services/database.js";
+import trainingDatabase, { ensureSpecialTrainingDepartments } from "../services/database.js";
 import { requireManagement } from "../services/permissions.js";
 
 
