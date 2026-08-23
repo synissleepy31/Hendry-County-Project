@@ -170,7 +170,7 @@ function formatDiscordApiError(body) {
 }
 
 
-function getPublicTrainingUrl() {
+function getPublicTrainingUrl(req = null) {
 
     const configured =
         String(
@@ -180,12 +180,52 @@ function getPublicTrainingUrl() {
             .trim()
             .replace(/\/+$/, "");
 
-
+    // Prefer a configured URL only if it is a Discord-compatible
+    // public HTTP(S) URL. Values such as localhost are valid to
+    // Node's URL parser but Discord rejects them for link buttons.
     if (configured) {
+        try {
+            const parsed = new URL(configured);
+            const hostname = String(parsed.hostname || "").toLowerCase();
+            const isLocal =
+                hostname === "localhost" ||
+                hostname === "127.0.0.1" ||
+                hostname === "0.0.0.0" ||
+                hostname === "::1";
 
-        return configured;
+            if (["http:", "https:"].includes(parsed.protocol) && !isLocal) {
+                return configured;
+            }
+        } catch {
+            // Fall through and derive the public URL from the request.
+        }
     }
 
+    // When hosted behind PebbleHost / a reverse proxy, derive the
+    // public browser-facing URL from forwarded headers.
+    if (req) {
+        const forwardedProto = String(req.get?.("x-forwarded-proto") || "")
+            .split(",")[0]
+            .trim();
+        const forwardedHost = String(req.get?.("x-forwarded-host") || "")
+            .split(",")[0]
+            .trim();
+        const host = forwardedHost || String(req.get?.("host") || "").trim();
+        const protocol = forwardedProto || String(req.protocol || "https").trim();
+
+        if (host && !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)(?::|$)/i.test(host)) {
+            const candidate = `${protocol}://${host}`.replace(/\/+$/, "");
+
+            try {
+                const parsed = new URL(candidate);
+                if (["http:", "https:"].includes(parsed.protocol)) {
+                    return candidate;
+                }
+            } catch {
+                // Ignore and return empty below.
+            }
+        }
+    }
 
     return "";
 }
@@ -397,7 +437,8 @@ async function getAttendance(
 
 
 async function sendDiscordAttendanceMessage(
-    session
+    session,
+    req = null
 ) {
 
     const botToken =
@@ -433,7 +474,7 @@ async function sendDiscordAttendanceMessage(
 
 
     const publicUrl =
-        getPublicTrainingUrl();
+        getPublicTrainingUrl(req);
 
 
     if (!publicUrl) {
@@ -1373,7 +1414,8 @@ router.post(
 
                 const result =
                     await sendDiscordAttendanceMessage(
-                        session
+                        session,
+                        req
                     );
 
 
@@ -1583,7 +1625,8 @@ router.post(
 
             const result =
                 await sendDiscordAttendanceMessage(
-                    session
+                    session,
+                    req
                 );
 
 
