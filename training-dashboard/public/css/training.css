@@ -1289,19 +1289,21 @@ body {
 
 
 .department-logo {
-    width: 65px;
-    height: 65px;
+    width: 82px;
+    height: 82px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    overflow: hidden;
+    flex-shrink: 0;
 
-    border: 2px solid #bfc2c7;
-    border-radius: 50%;
+    overflow: visible;
 
-    background: #0d0e10;
+    border: none;
+    border-radius: 0;
+
+    background: transparent;
 
     color: white;
 
@@ -1315,6 +1317,7 @@ body {
     height: 100%;
 
     object-fit: contain;
+    object-position: center;
 
     display: block;
 }
