@@ -139,6 +139,37 @@ function getBotToken() {
 }
 
 
+function formatDiscordApiError(body) {
+
+    const details = [];
+
+    function walk(node, path = "") {
+        if (!node || typeof node !== "object") return;
+
+        if (Array.isArray(node._errors)) {
+            for (const error of node._errors) {
+                if (error?.message) {
+                    details.push(`${path || "payload"}: ${error.message}`);
+                }
+            }
+        }
+
+        for (const [key, value] of Object.entries(node)) {
+            if (key === "_errors") continue;
+            walk(value, path ? `${path}.${key}` : key);
+        }
+    }
+
+    walk(body?.errors);
+
+    if (details.length) {
+        return `${body?.message || "Discord rejected the message."} ${details.join(" | ")}`;
+    }
+
+    return body?.message || "Discord rejected the message.";
+}
+
+
 function getPublicTrainingUrl() {
 
     const configured =
@@ -415,6 +446,27 @@ async function sendDiscordAttendanceMessage(
     }
 
 
+    let parsedPublicUrl;
+
+    try {
+        parsedPublicUrl = new URL(publicUrl);
+    } catch {
+        return {
+            ok: false,
+            message:
+                "TRAINING_PUBLIC_URL must be a full public URL, for example https://training.example.com"
+        };
+    }
+
+    if (!["http:", "https:"].includes(parsedPublicUrl.protocol)) {
+        return {
+            ok: false,
+            message:
+                "TRAINING_PUBLIC_URL must start with http:// or https://."
+        };
+    }
+
+
     const attendingUrl =
         `${publicUrl}/training/schedule/${session.id}/attendance/attending`;
 
@@ -481,7 +533,7 @@ async function sendDiscordAttendanceMessage(
                     `📚 ${session.department_code} Training Scheduled`,
 
                 description:
-                    `**${session.assessment_name}**\n\nA new training session has been scheduled. Please confirm your availability below.`,
+                    `**${String(session.assessment_name || "Training Session")}**\n\nA new training session has been scheduled. Please confirm your availability below.`,
 
                 color:
                     0xFF7A00,
@@ -492,7 +544,7 @@ async function sendDiscordAttendanceMessage(
                             "Department",
 
                         value:
-                            session.department_name,
+                            String(session.department_name || session.department_code || "Training"),
 
                         inline:
                             true
@@ -503,8 +555,11 @@ async function sendDiscordAttendanceMessage(
                             "Host",
 
                         value:
-                            session.host_display_name ||
-                            session.host_username,
+                            String(
+                                session.host_display_name ||
+                                session.host_username ||
+                                "Training Staff"
+                            ),
 
                         inline:
                             true
@@ -674,8 +729,9 @@ async function sendDiscordAttendanceMessage(
             ok: false,
 
             message:
-                body?.message ||
-                `Discord returned HTTP ${response.status}.`
+                body
+                    ? formatDiscordApiError(body)
+                    : `Discord returned HTTP ${response.status}.`
         };
     }
 
