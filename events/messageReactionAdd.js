@@ -31,6 +31,9 @@ export default {
             if (!member.roles.cache.has(VERIFY_ROLE_ID)) {
                 await member.roles.add(role, "Reacted to the click to verify message");
             }
+            await reaction.users.remove(user.id).catch(error => {
+                console.error("[CLICK TO VERIFY] Role was granted, but the reaction could not be removed:", error);
+            });
         } catch (error) {
             console.error("[CLICK TO VERIFY] Failed to assign verification role:", error);
         }
