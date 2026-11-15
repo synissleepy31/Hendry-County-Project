@@ -6,6 +6,7 @@ import {
     TextInputBuilder,
     TextInputStyle
 } from "discord.js";
+import { sendCommandLog } from "../services/commandLogger.js";
 
 
 const ROLE_REQUEST_DEPARTMENTS = {
@@ -72,7 +73,28 @@ export default {
                     interaction
                 );
 
+                await sendCommandLog(interaction.client, {
+                    title: `Slash command: /${interaction.commandName}`,
+                    fields: [
+                        { name: "Used by", value: `${interaction.user.tag} (<@${interaction.user.id}>)` },
+                        { name: "Server", value: interaction.guild?.name || "Direct message", inline: true },
+                        { name: "Channel", value: interaction.channel ? `<#${interaction.channel.id}>` : "Unknown", inline: true },
+                        { name: "Options", value: interaction.options.data.length
+                            ? interaction.options.data.map(option => `${option.name}: ${option.value ?? option.user?.tag ?? option.role?.name ?? option.channel?.name ?? "selected"}`).join("\n")
+                            : "No options" }
+                    ]
+                });
+
             } catch (error) {
+
+                await sendCommandLog(interaction.client, {
+                    title: `Slash command failed: /${interaction.commandName}`,
+                    fields: [
+                        { name: "Used by", value: `${interaction.user.tag} (<@${interaction.user.id}>)` },
+                        { name: "Server", value: interaction.guild?.name || "Direct message", inline: true },
+                        { name: "Error", value: error.message || "Unknown error" }
+                    ]
+                });
 
                 console.error(
                     `[COMMANDS] Error running /${interaction.commandName}:`,

@@ -44,7 +44,7 @@ function defaults() {
             "Hendry County Project",
 
         logChannelId:
-            "",
+            "1570101352233697420",
 
         timezone:
             "Europe/London",
@@ -72,15 +72,18 @@ export function getDashboardSettings() {
             return defaults();
         }
 
+        const saved = JSON.parse(
+            fs.readFileSync(
+                SETTINGS_FILE,
+                "utf8"
+            )
+        );
+
         return {
             ...defaults(),
-
-            ...JSON.parse(
-                fs.readFileSync(
-                    SETTINGS_FILE,
-                    "utf8"
-                )
-            )
+            ...saved,
+            logChannelId:
+                saved.logChannelId || defaults().logChannelId
         };
 
     } catch (error) {

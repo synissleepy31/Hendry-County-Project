@@ -97,6 +97,7 @@ import {
     saveNewsPosts,
     createNewsSlug
 } from "./services/newsStore.js";
+import { sendCommandLog } from "./services/commandLogger.js";
 
 // ======================================================
 // DISCORD BOT
@@ -195,6 +196,34 @@ app.use(
         }
     })
 );
+
+// Log successful dashboard actions (POST/PUT/DELETE API requests) to Discord.
+app.use((req, res, next) => {
+    if (!req.path.startsWith("/api/") || !["POST", "PUT", "DELETE"].includes(req.method)) {
+        return next();
+    }
+
+    res.once("finish", () => {
+        if (res.statusCode < 200 || res.statusCode >= 300 || !req.session?.user) return;
+
+        const actor = req.session.user;
+        const safeKeys = ["userId", "roleId", "channelId", "messageId", "id"];
+        const details = safeKeys
+            .filter(key => req.body?.[key] !== undefined && req.body[key] !== "")
+            .map(key => `${key}: ${String(req.body[key]).slice(0, 100)}`);
+
+        void sendCommandLog(client, {
+            title: `Dashboard action: ${req.method} ${req.path}`,
+            fields: [
+                { name: "Used by", value: `${actor.global_name || actor.username || "Discord User"} (<@${actor.id}>)` },
+                { name: "Result", value: `${res.statusCode}`, inline: true },
+                { name: "Targets", value: details.length ? details.join("\n") : "No target IDs" }
+            ]
+        });
+    });
+
+    next();
+});
 
 app.use(
     "/public",
