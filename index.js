@@ -107,13 +107,17 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildVoiceStates
     ],
 
     partials: [
-        Partials.Channel
+        Partials.Channel,
+        Partials.Message,
+        Partials.Reaction,
+        Partials.User
     ]
 });
 
