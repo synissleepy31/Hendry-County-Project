@@ -1,12 +1,15 @@
 import {
     SlashCommandBuilder,
+    EmbedBuilder,
     PermissionFlagsBits,
     MessageFlags
 } from "discord.js";
 
 const VERIFY_ROLE_ID = "1533590255624523830";
 const VERIFY_EMOJI = "✅";
-const VERIFY_MARKER = "click-to-verify";
+const VERIFY_DESCRIPTION =
+    `React with ${VERIFY_EMOJI} below to begin verification.\n\n` +
+    "You will receive the verified role once you react.";
 
 export default {
     data: new SlashCommandBuilder()
@@ -23,11 +26,15 @@ export default {
         }
 
         try {
+            const embed = new EmbedBuilder()
+                .setColor("#ff8534")
+                .setTitle("✅ Verification Panel")
+                .setDescription(VERIFY_DESCRIPTION)
+                .setFooter({ text: "Hendry County Project" })
+                .setTimestamp();
+
             const message = await interaction.channel.send({
-                content: `React with ${VERIFY_EMOJI} to receive the verified role.`,
-                embeds: [{
-                    footer: { text: VERIFY_MARKER }
-                }]
+                embeds: [embed]
             });
             await message.react(VERIFY_EMOJI);
 
