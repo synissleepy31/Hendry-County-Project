@@ -1,6 +1,7 @@
 import {
     AuditLogEvent,
-    EmbedBuilder
+    EmbedBuilder,
+    PermissionFlagsBits
 } from "discord.js";
 import { isBlacklisted } from "../services/moderationStore.js";
 
@@ -11,6 +12,38 @@ import { isBlacklisted } from "../services/moderationStore.js";
 const LEAVE_CHANNEL_ID = "1533856005333582006";
 
 const LEAVE_RED = "#d90404";
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function sendGoodbye(channel, payload) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+            return await channel.send(payload);
+        } catch (error) {
+            const permanentCodes = new Set([50001, 50013, 10003, 50035]);
+            const transient = !permanentCodes.has(error.code) &&
+                (!error.status || error.status >= 500 || error.code === "ECONNRESET");
+            if (!transient || attempt === 3) throw error;
+            await wait(attempt * 750);
+        }
+    }
+}
+
+async function fetchLeaveChannel(guild) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+            return await guild.channels.fetch(LEAVE_CHANNEL_ID);
+        } catch (error) {
+            const permanentCodes = new Set([50001, 50013, 10003]);
+            const transient = !permanentCodes.has(error.code) &&
+                (!error.status || error.status >= 500 || error.code === "ECONNRESET");
+            if (!transient || attempt === 3) throw error;
+            await wait(attempt * 750);
+        }
+    }
+}
 
 async function getRemovalReason(guild, userId) {
     if (isBlacklisted(guild.id, userId)) return "blacklisted";
@@ -27,7 +60,9 @@ async function getRemovalReason(guild, userId) {
             );
             if (recentMatch) return reason;
         } catch (error) {
-            console.warn(`[LEAVE] Could not check ${reason} audit logs:`, error.message);
+            if (error.code !== 50001 && error.code !== 50013) {
+                console.warn(`[LEAVE] Could not check ${reason} audit logs (${error.code || error.message}).`);
+            }
         }
     }
 
@@ -64,10 +99,7 @@ export default {
                 `[LEAVE] ${member.user.tag} ${actionText[removalReason]}.`
             );
 
-            const channel =
-                member.guild.channels.cache.get(
-                    LEAVE_CHANNEL_ID
-                );
+            const channel = await fetchLeaveChannel(member.guild);
 
             if (!channel) {
                 console.error(
@@ -82,6 +114,17 @@ export default {
                     "[LEAVE] Leave channel is not a text channel."
                 );
 
+                return;
+            }
+
+            const botMember = member.guild.members.me;
+            const permissions = botMember && channel.permissionsFor(botMember);
+            if (!permissions?.has([
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.EmbedLinks
+            ])) {
+                console.error(`[LEAVE] Bot is missing permission to post in channel ${LEAVE_CHANNEL_ID}.`);
                 return;
             }
 
@@ -108,7 +151,7 @@ export default {
 
                     .setTimestamp();
 
-            await channel.send({
+            await sendGoodbye(channel, {
                 embeds: [
                     embed
                 ],
@@ -123,10 +166,7 @@ export default {
             );
 
         } catch (error) {
-            console.error(
-                "[LEAVE] Error sending goodbye message:",
-                error
-            );
+            console.error(`[LEAVE] Could not post goodbye message (${error.code || error.message}).`);
         }
     }
 };
